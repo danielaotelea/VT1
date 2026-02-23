@@ -1,14 +1,24 @@
-# VT1
+# Observability for AI Agents
 
-Observability for AI Agents: Systematic Analysis and Evaluation of Open-Source Tooling
+A concise, practical exploration of how to make AI agents observable and debuggable using open-source tooling.
 
-Firstly, let's understand what an AI agent is and its components. [This document](docs/phase-0-what-is-an-agent.md) provides an overview of the key components of an AI agent, including the reasoning engine, tool integration, and multi-agent coordination mechanisms.
+This repository contains analysis, requirements, and a small prototype plan for instrumenting agent reasoning, tool usage, and multi-agent coordination so that you can monitor, debug, and evaluate agent behavior in development and production.
 
-The project planning is described in the [project roadmap](docs/planning.md) and the observability requirements are
-defined in the [observability requirements document](docs/phase-1-observability-requirements.md).
+---
 
-The project will be  implemented in Python and will leverage open-source tools for logging, monitoring, and visualization.
-The implementation  will focus on creating a simple AI agent that incorporates the defined observability features and evaluating its
-performance in a multi-agent environment.
+## Table of contents
 
+- [What is an AI agent?](docs/phase-0-what-is-an-agent.md)
+- [Observability requirements](docs/phase-1-observability-requirements.md)
+- [Project roadmap / planning](docs/planning.md)
 
+---
+
+## Quick start
+
+- Read the high-level overview:
+  - Open `docs/phase-0-what-is-an-agent.md` to understand agent components.
+- Review the observability requirements and metrics
+  - Open `docs/phase-1-observability-requirements.md`.
+- See the project plan and subtasks
+  - Open `docs/planning.md` for a phase-by-phase roadmap and checklists.

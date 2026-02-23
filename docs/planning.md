@@ -1,34 +1,64 @@
 # Project Task Roadmap
 
-## Phase 0: Understanding what is an AI agent and its components 
- Goal: Understand the key components of an AI agent, including the reasoning engine, tool integration, and multi-agent coordination mechanisms. 
- [ ] Review existing literature and documentation on AI agents to identify common architectures and functionalities. 
- [ ] Define the core components of an AI agent and their interactions.
+## Phase 0: Understanding what is an AI agent and its components
 
-## Phase 1: Observability Requirements Definition 
- Goal: What to measure and why? 
- [ ] Document the key observability requirements for AI agents, covering reasoning traceability, multi-agent coordination, governance, performance, quality, and safety metrics. 
- [ ] Define specific metrics and logging needs for each requirement area.
+### Goal: Understand the key components of an AI agent
+- Description: Identify the reasoning engine, tool integration points, and multi-agent coordination mechanisms.
+- Subtasks:
+  - [ ] Review existing literature and documentation on AI agents to identify common architectures and functionalities.
+  - [ ] Define the core components of an AI agent and their interactions (memory, planning, tools, interfaces).
+  - [ ] Summarize findings in a short memo (1-2 pages) with references.
+
+## Phase 1: Observability Requirements Definition
+
+### Goal: Define what to measure and why
+- Description: Capture observability goals for reasoning traceability, governance, performance, quality, and safety.
+- Subtasks:
+  - [ ] Document the key observability requirement areas (reasoning trace, multi-agent coordination, governance, performance, quality, safety).
+  - [ ] For each requirement area, define specific metrics, logs, events, and traces needed.
+  - [ ] Identify retention, privacy, and security requirements for observability data.
 
 ## Phase 2: Tooling Landscape Analysis
- Goal: Identify and evaluate existing open-source tools that can support the defined observability requirements.
- [ ] Relevant tools 
- [ ] Integration capabilities 
- [ ] Strengths and limitations of each tool in the context of AI agent observability. Document findings in a comparative analysis format.
- 
-## Phase 3: Implementation and Evaluation
- Goal: Implement a simple AI agent with integrated observability features based on the defined requirements and selected tools. 
- [ ] Develop a prototype AI agent that incorporates the identified observability metrics and logging mechanisms. 
- [ ] Evaluate the effectiveness of the implemented observability features through testing and analysis, focusing on transparency, efficiency, and safety in multi-agent environments.
- 
-Goal: Implement a functional multi-agent workload and integrate the observability features to monitor and evaluate agent interactions and performance. 
- [ ] Design and implement a multi-agent workload that simulates realistic scenarios requiring coordination and tool usage. 
- [ ] Integrate the defined observability features into the multi-agent system to capture relevant metrics and logs during execution. 
- [ ] Analyze the collected data to assess the effectiveness of the observability features in providing insights into agent behavior, coordination, and performance.
 
-Goal: Configure the selected tools to visualize agent reasoning and cross-service correlations. 
+### Goal: Identify and evaluate open-source tools for observability
+- Description: Produce a comparative analysis of candidate tools and how they fit the defined requirements.
+- Subtasks:
+  - [ ] Produce an inventory of relevant tools (e.g., OpenTelemetry, Jaeger, Prometheus, Grafana, Elastic stack, Temporal, SigSci, Honeycomb).
+  - [ ] For each tool, evaluate integration capabilities (libraries, ingestion formats, exporters) and ease of integration with agents.
+  - [ ] Document strengths, limitations, license constraints, and operational considerations for each tool.
+  - [ ] Select a small set (1-3) of tools to prototype with, and justify the choice.
+
+## Phase 3: Implementation and Evaluation
+
+### Goal A: Implement a prototype AI agent with observability
+- Description: Build a minimal agent that emits the defined observability artifacts.
+- Subtasks:
+  - [ ] Develop a prototype AI agent that incorporates the identified observability metrics, logs, and traces.
+  - [ ] Instrument key reasoning steps so reasoning traces, decisions, and tool calls are recorded.
+  - [ ] Add configuration options for sampling, verbosity, and exporters.
+  - [ ] Write unit/integration tests for the instrumentation (happy path + 1-2 edge cases).
+
+### Goal B: Implement a multi-agent workload and integrate observability
+- Description: Create a small multi-agent scenario to exercise coordination and tool usage.
+- Subtasks:
+  - [ ] Design and implement a multi-agent workload that simulates real coordination scenarios.
+  - [ ] Integrate the observability features into the multi-agent system to capture inter-agent events and correlations.
+  - [ ] Run experiments and collect data across multiple runs to validate metrics and traces.
+  - [ ] Analyze collected data to assess transparency, coordination correctness, and performance bottlenecks.
+
+### Goal C: Configure visualization and correlation
+- Description: Configure dashboards and traces to visualize agent reasoning and cross-service correlations.
+- Subtasks:
+  - [ ] Build example dashboards (metrics + logs + traces) to show agent health, latency, and decision traces.
+  - [ ] Configure trace correlation between agent actions, tool calls, and downstream services.
+  - [ ] Produce a short how-to guide for interpreting dashboards and traces.
 
 ## Phase 4: Evaluation, Best Practices and Documentation
- Goal: Evaluate the overall effectiveness of the implemented observability features and document best practices for monitoring AI agents. 
- [ ] Document best practices for monitoring AI agents, including recommendations for tool selection, metric definition, and logging strategies to ensure effective observability in real-world applications.
- [ ] Define and derive the architectural patterns for "production-grade" agent observability. 
+
+### Goal: Evaluate implementation and capture best practices
+- Description: Consolidate learnings and provide guidance for production-grade observability of agents.
+- Subtasks:
+  - [ ] Evaluate the overall effectiveness of the implemented observability features (transparency, efficiency, safety).
+  - [ ] Document best practices for monitoring AI agents, including tool selection, metric definitions, and logging strategies.
+  - [ ] Derive architectural patterns and operational recommendations for "production-grade" agent observability.
+  - [ ] Produce a short final report and a README for the prototype that includes setup and evaluation instructions.

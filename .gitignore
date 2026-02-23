@@ -1,2 +1,8 @@
 .env
 .vevn
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.idea/

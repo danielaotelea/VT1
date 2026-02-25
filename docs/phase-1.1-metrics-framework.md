@@ -47,6 +47,7 @@
 | **Violation Precision/Recall** | True positives (blocked harms) vs false negatives (missed harms)            | TP/FP/FN/TN tracking with F1 score computation?*  |
 
 ### TP/TN/FP/FN
+
 In the context of guardrail violation detection, the TP/TN/FP/FN measure how well your policy enforcement system
 identifies actual violations:
 
@@ -58,6 +59,96 @@ identifies actual violations:
 | FN (False Negative) | Missed actual violation          | Malicious prompt → allowed          |
 
 Why It Matters for Governance?
-* **Precision** = TP/(TP+FP): % of blocked actions that were actually harmful
-* **Recall** = TP/(TP+FN): % of actual violations that were caught
-* **F1 Score** = 2×(Precision×Recall)/(Precision+Recall): Balances both
+
+Precision, Recall and F1 are standard measures for classifier/alert quality. Use LaTeX display math so they render cleanly in MathJax/KaTeX-capable viewers.
+
+Precision (fraction of flagged/blocked actions that were actually harmful):
+
+$$
+\mathrm{Precision} = \frac{TP}{TP + FP}
+$$
+
+As a percentage:
+
+$$
+\mathrm{Precision}\% = \frac{TP}{TP + FP} \times 100\%
+$$
+
+Recall (fraction of actual harmful actions that were detected):
+
+$$
+\mathrm{Recall} = \frac{TP}{TP + FN}
+$$
+
+As a percentage:
+
+$$
+\mathrm{Recall}\% = \frac{TP}{TP + FN} \times 100\%
+$$
+
+F1 score (harmonic mean of precision and recall):
+
+$$
+F_1 = 2 \cdot \frac{\mathrm{Precision} \cdot \mathrm{Recall}}{\mathrm{Precision} + \mathrm{Recall}} = \frac{2\,TP}{2\,TP + FP + FN}
+$$
+
+Edge cases and reporting guidance:
+- If a denominator (e.g. $TP+FP$ or $TP+FN$) equals zero, the ratio is undefined; report the metric as "N/A" and include the raw counts (TP/FP/FN) so readers can interpret the result.
+
+Numeric example:
+- TP = 80, FP = 20, FN = 10
+  - Precision = $\dfrac{80}{80+20} = 0.80$ → Precision% = $80\%$
+  - Recall = $\dfrac{80}{80+10} \approx 0.8889$ → Recall% ≈ $88.89\%$
+  - F1 = $\dfrac{2\times 80}{2\times 80 + 20 + 10} \approx 0.8419$ → F1 ≈ $84.19\%$
+
+
+4. [Performance Metrics](./phase-1.0-observability-requirements.md) — see the "4. Performance Metrics" section in that
+   file.
+
+| Metric               | Description                           | Evaluation Criteria                    |
+|----------------------|---------------------------------------|----------------------------------------|
+| End-to-End Latency   | Time from request to final response   | P95/P99 percentiles across sessions?   |
+| Token Usage/Cost     | Total input+output tokens per task    | Provider breakdown + cost attribution? |
+| Error Rate           | % failed tasks (exceptions, timeouts) | Structured error classification?       |
+| Concurrency Capacity | Max simultaneous agent instances      | Load testing + saturation points?      |
+| Cache Hit Rate       | % repeated computations avoided       | Semantic deduplication tracking?       |
+
+### What Are Percentiles?
+
+Percentiles are statistical measures that indicate the value below which a given percentage of observations in a dataset
+fall.
+While an average (mean) tells you how the system performs for the "typical" user, percentiles reveal how it performs for
+the users experiencing the most friction or lag.
+
+* **P95 (95th Percentile)**: This is the value below which 95% of all sessions fall. In other words, only 5% of your
+  agent
+  sessions are slower than this value. It represents the experience of your "frustrated" users.
+
+* **P99 (99th Percentile)**: This is the value below which 99% of all sessions fall. Only 1% of sessions are slower than
+  this.
+  This is often referred to as "tail latency" and represents the "worst-case" scenarios—such as a session hitting a
+  massive loop, a tool timeout, or a token explosion.
+
+5. [Quality Metrics](./phase-1.0-observability-requirements.md) — see the "5. Quality Metrics" section in that file.
+
+| Metric            | Description                      | Evaluation Criteria                      |
+|-------------------|----------------------------------|------------------------------------------|
+| Task Success Rate | % tasks completed successfully   | Automated success criteria + human eval? |
+| Output Accuracy   | Correctness vs ground truth      | LLM-as-judge or dataset evals?           |
+| User Satisfaction | CSAT scores from human feedback  | Session-level thumbs up/down capture?    |
+| Completeness      | % required information provided  | Checklist validation per task type?      |
+| Actionability     | % outputs leading to user action | Click-through or follow-up rates?        |
+
+* CSAT scores (Customer Satisfaction Score) measure how happy users are with specific agent interactions using simple
+  post-task surveys.
+
+6. [Safety Metrics](./phase-1.0-observability-requirements.md) — see the "6. Safety Metrics" section in that file.
+
+# What Drift Detection should cover in an agent context?
+
+| Drift Type     | What Changes                           | Impact on Agents       | Detection Method                          |
+|----------------|----------------------------------------|------------------------|-------------------------------------------|
+| Data Drift     | Input distributions (prompts, context) | Poor reasoning quality | Statistical tests (KS, PSI) on embeddings |
+| Concept Drift  | Task semantics/expected outputs        | Task success drops     | Output quality metrics vs baseline        |
+| Model Drift    | Underlying LLM performance             | Reasoning degrades     | Token usage + latency anomalies           |
+| Behavior Drift | Agent decision patterns                | Coordination fails     | Step count, tool call distributions       |

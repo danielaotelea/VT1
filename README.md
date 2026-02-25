@@ -9,7 +9,7 @@ This repository contains analysis, requirements, and a small prototype plan for 
 ## Table of contents
 
 - [What is an AI agent?](docs/phase-0-what-is-an-agent.md)
-- [Observability requirements](docs/phase-1-observability-requirements.md)
+- [Observability requirements](docs/phase-1.0-observability-requirements.md)
 - [Project roadmap / planning](docs/planning.md)
 
 ---

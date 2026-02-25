@@ -5,16 +5,16 @@
 ### Goal: Understand the key components of an AI agent
 - Description: Identify the reasoning engine, tool integration points, and multi-agent coordination mechanisms.
 - Subtasks:
-  - [ ] Review existing literature and documentation on AI agents to identify common architectures and functionalities.
-  - [ ] Define the core components of an AI agent and their interactions (memory, planning, tools, interfaces).
-  - [ ] Summarize findings in a short memo (1-2 pages) with references.
+  - [x] Review existing literature and documentation on AI agents to identify common architectures and functionalities.
+  - [x] Define the core components of an AI agent and their interactions (memory, planning, tools, interfaces).
+  - [x] Summarize findings in a short memo (1-2 pages) with references.
 
 ## Phase 1: Observability Requirements Definition
 
 ### Goal: Define what to measure and why
 - Description: Capture observability goals for reasoning traceability, governance, performance, quality, and safety.
 - Subtasks:
-  - [ ] Document the key observability requirement areas (reasoning trace, multi-agent coordination, governance, performance, quality, safety).
+  - [x] Document the key observability requirement areas (reasoning trace, multi-agent coordination, governance, performance, quality, safety).
   - [ ] For each requirement area, define specific metrics, logs, events, and traces needed.
   - [ ] Identify retention, privacy, and security requirements for observability data.
 
@@ -23,10 +23,10 @@
 ### Goal: Identify and evaluate open-source tools for observability
 - Description: Produce a comparative analysis of candidate tools and how they fit the defined requirements.
 - Subtasks:
-  - [ ] Produce an inventory of relevant tools (e.g., OpenTelemetry, Jaeger, Prometheus, Grafana, Elastic stack, Temporal, SigSci, Honeycomb).
+  - [ ] Produce an inventory of relevant tools (e.g., Arize Phoenix, Langfuse, Langtrace, Opik)
   - [ ] For each tool, evaluate integration capabilities (libraries, ingestion formats, exporters) and ease of integration with agents.
   - [ ] Document strengths, limitations, license constraints, and operational considerations for each tool.
-  - [ ] Select a small set (1-3) of tools to prototype with, and justify the choice.
+  - [ ] Select a small set of tools to prototype with, and justify the choice.
 
 ## Phase 3: Implementation and Evaluation
 

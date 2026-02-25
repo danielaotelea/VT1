@@ -4,7 +4,7 @@ Unlike traditional systems, an intelligent agent’s **state** encompasses not o
 
 ***
 
-## 1. Reasoning Traceability
+<h2 id="reasoning-traceability">1. Reasoning Traceability</h2>
 
 Capturing and auditing the reasoning process helps ensure interpretability, accountability, and optimization of agent behaviors.
 
@@ -93,3 +93,12 @@ The Metric: It introduces DHARMA, a diagnostic measure designed to perform "Fail
   * Human Wait Time: This measures the latency introduced by human intervention. It’s critical for user experience and operational cost management. 
     * Why it matters: A long wait time can lead to user frustration and increased labor costs, especially if the agent frequently hits boundaries that require human input.
     * [Orchestration Latency](papers/agentic-ai-orchestration-latency.pdf) highlights that for enterprise agents, the "vibe" often dies not because the AI is slow, but because the human-in-the-loop is the bottleneck.Impact on UX: In a chat-based agent, a "Wait Time" $> 60$ seconds typically leads to a 40% drop in user satisfaction, even if the eventual answer is perfect.
+
+
+
+---
+# Other things to consider:
+https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents
+
+
+https://arxiv.org/html/2503.06745v1

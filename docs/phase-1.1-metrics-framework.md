@@ -60,7 +60,8 @@ identifies actual violations:
 
 Why It Matters for Governance?
 
-Precision, Recall and F1 are standard measures for classifier/alert quality. Use LaTeX display math so they render cleanly in MathJax/KaTeX-capable viewers.
+Precision, Recall and F1 are standard measures for classifier/alert quality. Use LaTeX display math so they render
+cleanly in MathJax/KaTeX-capable viewers.
 
 Precision (fraction of flagged/blocked actions that were actually harmful):
 
@@ -93,13 +94,16 @@ F_1 = 2 \cdot \frac{\mathrm{Precision} \cdot \mathrm{Recall}}{\mathrm{Precision}
 $$
 
 Edge cases and reporting guidance:
-- If a denominator (e.g. $TP+FP$ or $TP+FN$) equals zero, the ratio is undefined; report the metric as "N/A" and include the raw counts (TP/FP/FN) so readers can interpret the result.
+
+- If a denominator (e.g. $TP+FP$ or $TP+FN$) equals zero, the ratio is undefined; report the metric as "N/A" and include
+  the raw counts (TP/FP/FN) so readers can interpret the result.
 
 Numeric example:
+
 - TP = 80, FP = 20, FN = 10
-  - Precision = $\dfrac{80}{80+20} = 0.80$ → Precision% = $80\%$
-  - Recall = $\dfrac{80}{80+10} \approx 0.8889$ → Recall% ≈ $88.89\%$
-  - F1 = $\dfrac{2\times 80}{2\times 80 + 20 + 10} \approx 0.8419$ → F1 ≈ $84.19\%$
+    - Precision = $\dfrac{80}{80+20} = 0.80$ → Precision% = $80\%$
+    - Recall = $\dfrac{80}{80+10} \approx 0.8889$ → Recall% ≈ $88.89\%$
+    - F1 = $\dfrac{2\times 80}{2\times 80 + 20 + 10} \approx 0.8419$ → F1 ≈ $84.19\%$
 
 
 4. [Performance Metrics](./phase-1.0-observability-requirements.md) — see the "4. Performance Metrics" section in that
@@ -146,9 +150,21 @@ the users experiencing the most friction or lag.
 
 # What Drift Detection should cover in an agent context?
 
-| Drift Type     | What Changes                           | Impact on Agents       | Detection Method                          |
-|----------------|----------------------------------------|------------------------|-------------------------------------------|
-| Data Drift     | Input distributions (prompts, context) | Poor reasoning quality | Statistical tests (KS, PSI) on embeddings |
-| Concept Drift  | Task semantics/expected outputs        | Task success drops     | Output quality metrics vs baseline        |
-| Model Drift    | Underlying LLM performance             | Reasoning degrades     | Token usage + latency anomalies           |
-| Behavior Drift | Agent decision patterns                | Coordination fails     | Step count, tool call distributions       |
+| Drift Type      | What Changes                           | Impact on Agents       | Detection Method                          |
+|-----------------|----------------------------------------|------------------------|-------------------------------------------|
+| Data Drift      | Input distributions (prompts, context) | Poor reasoning quality | Statistical tests (KS, PSI) on embeddings |
+| Concept Drift   | Task semantics/expected outputs        | Task success drops     | Output quality metrics vs baseline        |
+| Model Drift     | Underlying LLM performance             | Reasoning degrades     | Token usage + latency anomalies           |
+| Behavior Drift  | Agent decision patterns                | Coordination fails     | Step count, tool call distributions       |
+| Sentiment Drift | Agent tone/personality changes         | User dissatisfaction   | LLM-evaluated sentiment scores            |
+
+
+
+
+# Retention, privacy, and security requirements for observability data
+
+There are different types of observability data (metrics, logs, traces) and each has its own retention, privacy, and security requirements. 
+
+Swiss Data Protection Act (DPA) and the General Data Protection Regulation (GDPR) in the European Union are two key regulations that govern data privacy and security.
+Based on the industry best practices and regulatory requirements, there might be different retention periods for different types of observability data. 
+For example, metrics might be retained for 90 days, logs for 30 days, and traces for 7 days.

@@ -15,15 +15,15 @@
 - Description: Capture observability goals for reasoning traceability, governance, performance, quality, and safety.
 - Subtasks:
   - [x] Document the key observability requirement areas (reasoning trace, multi-agent coordination, governance, performance, quality, safety).
-  - [ ] For each requirement area, define specific metrics, logs, events, and traces needed.
-  - [ ] Identify retention, privacy, and security requirements for observability data.
+  - [x] For each requirement area, define specific metrics, logs, events, and traces needed.
+  - [x] Identify retention, privacy, and security requirements for observability data.
 
 ## Phase 2: Tooling Landscape Analysis
 
 ### Goal: Identify and evaluate open-source tools for observability
 - Description: Produce a comparative analysis of candidate tools and how they fit the defined requirements.
 - Subtasks:
-  - [ ] Produce an inventory of relevant tools (e.g., Arize Phoenix, Langfuse, Langtrace, Opik)
+  - [x] Produce an inventory of relevant tools (e.g., Arize Phoenix, Langfuse, Langtrace, Opik)
   - [ ] For each tool, evaluate integration capabilities (libraries, ingestion formats, exporters) and ease of integration with agents.
   - [ ] Document strengths, limitations, license constraints, and operational considerations for each tool.
   - [ ] Select a small set of tools to prototype with, and justify the choice.

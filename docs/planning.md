@@ -24,9 +24,9 @@
 - Description: Produce a comparative analysis of candidate tools and how they fit the defined requirements.
 - Subtasks:
   - [x] Produce an inventory of relevant tools (e.g., Arize Phoenix, Langfuse, Langtrace, Opik)
-  - [ ] For each tool, evaluate integration capabilities (libraries, ingestion formats, exporters) and ease of integration with agents.
+  - [x] Select a small set of tools to prototype with, and justify the choice.
+  - [x] For each tool, evaluate integration capabilities (libraries, ingestion formats, exporters) and ease of integration with agents.
   - [ ] Document strengths, limitations, license constraints, and operational considerations for each tool.
-  - [ ] Select a small set of tools to prototype with, and justify the choice.
 
 ## Phase 3: Implementation and Evaluation
 

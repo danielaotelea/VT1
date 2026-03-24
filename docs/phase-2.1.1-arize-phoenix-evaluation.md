@@ -1,7 +1,11 @@
 # Arize Phoenix
 
+
+
 ## Overview
 
+# Span -> Trace.id -> session id
+https://www.youtube.com/watch?v=fHGSxOhWO-g&t=306s
 ## Three-pillar evaluation
 
 ### Pillar 1: Integration and Instrumentation Capabilities (The "How")

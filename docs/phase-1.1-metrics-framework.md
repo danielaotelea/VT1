@@ -60,8 +60,7 @@ identifies actual violations:
 
 Why It Matters for Governance?
 
-Precision, Recall and F1 are standard measures for classifier/alert quality. Use LaTeX display math so they render
-cleanly in MathJax/KaTeX-capable viewers.
+Precision, Recall and F1 are standard measures for classifier/alert quality.
 
 Precision (fraction of flagged/blocked actions that were actually harmful):
 

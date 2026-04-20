@@ -5,3 +5,20 @@ langgraph>=1.1.0
 langwatch>=0.16.0
 python-dotenv
 httpx<0.28.0
+
+# Multi-agent: web search (pick one or both; both are tried in order)
+duckduckgo-search>=6.0.0
+tavily-python>=0.3.0
+
+# otel-stdout exporter
+opentelemetry-sdk>=1.20.0
+opentelemetry-exporter-otlp-proto-grpc>=1.20.0
+
+# Optional observability backends — install whichever you're evaluating
+# Langfuse (also needs local Docker Compose for self-hosted server):
+# langfuse>=2.0.0
+# Arize Phoenix:
+# arize-phoenix>=4.0.0
+# openinference-instrumentation-langchain>=0.1.0
+# Comet Opik (also needs local Docker Compose for self-hosted server):
+# opik>=1.0.0

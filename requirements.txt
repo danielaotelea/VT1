@@ -1,6 +1,6 @@
 langchain>=1.2.0
 langchain-core>=1.2.0
-langchain-openai>=0.3.0
+langchain-openai>=1.2.1
 langgraph>=1.1.0
 langwatch>=0.16.0
 python-dotenv
@@ -14,11 +14,16 @@ tavily-python>=0.3.0
 opentelemetry-sdk>=1.20.0
 opentelemetry-exporter-otlp-proto-grpc>=1.20.0
 
+# UI / API
+gradio>=4.0.0
+fastapi>=0.110.0
+uvicorn>=0.29.0
+
 # Optional observability backends — install whichever you're evaluating
 # Langfuse (also needs local Docker Compose for self-hosted server):
-# langfuse>=2.0.0
+langfuse>=2.0.0
 # Arize Phoenix:
-# arize-phoenix>=4.0.0
-# openinference-instrumentation-langchain>=0.1.0
+arize-phoenix>=4.0.0
+openinference-instrumentation-langchain>=0.1.0
 # Comet Opik (also needs local Docker Compose for self-hosted server):
-# opik>=1.0.0
+opik>=1.0.0

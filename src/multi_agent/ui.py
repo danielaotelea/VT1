@@ -1,19 +1,19 @@
-"""Gradio chat UI — calls the SimpleAgent FastAPI backend."""
+"""Gradio chat UI — calls the Multi-Agent Research FastAPI backend."""
 
 import httpx
 import gradio as gr
 
-BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = "http://localhost:8001"
 
 EXPORTERS = ["langfuse", "phoenix", "opik", "otel-stdout", "none"]
 
 EXAMPLES = [
-    ["What is 6 multiplied by 7?"],
-    ["What is 123 plus 456?"],
-    ["Divide 100 by 4, then add 13."],
-    ["Multiply 8 by 9, then divide the result by 6."],
-    ["What is 15 divided by 3?"],
-    ["Add 27 and 73, then multiply by 2."],
+    ["What are the main observability tools for LLM agents in 2025?"],
+    ["How does LangSmith compare to Langfuse for LLM tracing?"],
+    ["What is OpenTelemetry and how is it used in AI systems?"],
+    ["What are best practices for monitoring multi-agent AI pipelines?"],
+    ["How does Arize Phoenix support LLM evaluation?"],
+    ["What is the difference between tracing and logging in AI observability?"],
 ]
 
 _current_exporter: dict[str, str] = {"value": "none"}
@@ -35,19 +35,25 @@ def chat(message: str, _history: list[dict]) -> str:
     exporter = _current_exporter["value"]
     response = httpx.post(
         f"{BACKEND_URL}/chat",
-        json={"message": message, "exporter": exporter},
-        timeout=60,
+        json={"query": message, "exporter": exporter},
+        timeout=120,
     )
     response.raise_for_status()
-    return response.json()["response"]
+    data = response.json()
+
+    hitl_warning = "\n\n⚠️ **HITL escalation required** — confidence too low after retries." if data["hitl_required"] else ""
+    scores = (
+        f"\n\n---\n"
+        f"**Evaluation** | faithfulness: `{data['faithfulness']:.2f}` | "
+        f"completeness: `{data['completeness']:.2f}` | "
+        f"label: `{data['label']}` | "
+        f"retries: `{data['retry_count']}`"
+    )
+    return data["final_answer"] + scores + hitl_warning
 
 
-def load_example(example: list[str]) -> str:
-    return example[0]
-
-
-with gr.Blocks(title="Simple Agent") as demo:
-    gr.Markdown("## Simple Agent\nArithmetic agent with pluggable observability tracing.")
+with gr.Blocks(title="Multi-Agent Research") as demo:
+    gr.Markdown("## Multi-Agent Research & Fact-Check\nResearch queries answered by Researcher → Evaluator → Orchestrator pipeline.")
 
     with gr.Row():
         exporter_dd = gr.Dropdown(
@@ -82,4 +88,4 @@ with gr.Blocks(title="Simple Agent") as demo:
     )
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(server_port=7861)

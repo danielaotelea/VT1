@@ -20,6 +20,8 @@ Observability:
   full inter-agent trace is available to the observability platform.
 """
 
+import logging
+import os
 import re
 from collections import Counter
 from datetime import datetime, timezone
@@ -34,6 +36,8 @@ from .researcher import ResearcherAgent
 from .state import AgentState, EvaluationResult, ResearchResult, TraceEvent
 
 load_dotenv()
+
+log = logging.getLogger("multi_agent.orchestrator")
 
 
 # Matches common credential / API key patterns in text
@@ -105,31 +109,43 @@ class OrchestratorAgent:
             try:
                 import langwatch
                 langwatch.setup()
+                log.info("Exporter: langwatch initialised")
                 return langwatch
-            except Exception:
+            except Exception as e:
+                log.warning("Exporter: langwatch failed: %s", e)
                 return None
         if self.config.exporter == "langfuse":
             try:
-                from langfuse.callback import CallbackHandler
-                return CallbackHandler()
-            except Exception:
+                from langfuse.langchain import CallbackHandler
+                handler = CallbackHandler()
+                log.info("Exporter: langfuse initialised (url=%s)", os.getenv("LANGFUSE_HOST", "http://localhost:3000"))
+                return handler
+            except Exception as e:
+                log.warning("Exporter: langfuse failed: %s", e)
                 return None
         if self.config.exporter == "phoenix":
             try:
-                import phoenix as px
+                from phoenix.otel import register
                 from openinference.instrumentation.langchain import LangChainInstrumentor
-                px.launch_app()
-                LangChainInstrumentor().instrument()
-                return px
-            except Exception:
+                base = os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006")
+                endpoint = f"{base.rstrip('/')}/v1/traces"
+                tracer_provider = register(project_name="vt1-multi-agent", endpoint=endpoint)
+                LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
+                log.info("Exporter: phoenix initialised (endpoint=%s)", endpoint)
+                return tracer_provider
+            except Exception as e:
+                log.warning("Exporter: phoenix failed: %s", e)
                 return None
         if self.config.exporter == "opik":
             try:
-                import opik
-                opik.configure(use_local=True)
                 from opik.integrations.langchain import OpikTracer
-                return OpikTracer()
-            except Exception:
+                project = os.getenv("OPIK_PROJECT_NAME", "vt1-multi-agent")
+                url = os.getenv("OPIK_URL_OVERRIDE", "http://localhost:5173/api")
+                tracer = OpikTracer(project_name=project)
+                log.info("Exporter: opik initialised (project=%s, url=%s)", project, url)
+                return tracer
+            except Exception as e:
+                log.warning("Exporter: opik failed: %s", e)
                 return None
         if self.config.exporter == "otel-stdout":
             try:
@@ -139,9 +155,30 @@ class OrchestratorAgent:
                 provider = TracerProvider()
                 provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
                 otel_trace.set_tracer_provider(provider)
+                log.info("Exporter: otel-stdout initialised")
                 return provider
+            except Exception as e:
+                log.warning("Exporter: otel-stdout failed: %s", e)
+                return None
+        log.info("Exporter: none (tracing disabled)")
+        return None
+
+    def _langchain_callback(self):
+        """Return a LangChain callback for the active exporter, or None.
+
+        Mirrors the same helper in SimpleAgent so the same callback is passed
+        to every model.invoke() call — including those inside sub-agents.
+        """
+        if self._exporter is None:
+            return None
+        if self.config.exporter == "langwatch":
+            try:
+                return self._exporter.get_current_trace().get_langchain_callback()
             except Exception:
                 return None
+        if self.config.exporter in ("langfuse", "opik"):
+            return self._exporter
+        # phoenix / otel-stdout: auto-instrumented globally; no per-call callback needed
         return None
 
     # ------------------------------------------------------------------
@@ -183,7 +220,13 @@ class OrchestratorAgent:
             messages = [messages[0]] + messages[-keep:]
         return messages
 
-    def _synthesise(self, query: str, research: ResearchResult, evaluation: EvaluationResult) -> str:
+    def _synthesise(
+        self,
+        query: str,
+        research: ResearchResult,
+        evaluation: EvaluationResult,
+        callback=None,
+    ) -> str:
         """Call the Orchestrator LLM to produce the final answer."""
         sources_text = "\n".join(
             f"[{i+1}] {s.get('url', '')} — {s.get('excerpt', '')}"
@@ -200,7 +243,11 @@ class OrchestratorAgent:
             SystemMessage(content=_SYNTHESIS_PROMPT),
             HumanMessage(content=user_content),
         ]
-        response = self.model.invoke(messages)
+        invoke_kwargs: dict = {}
+        if callback is not None:
+            from langchain_core.runnables import RunnableConfig
+            invoke_kwargs["config"] = RunnableConfig(callbacks=[callback])
+        response = self.model.invoke(messages, **invoke_kwargs)
         return getattr(response, "content", str(response))
 
     # ------------------------------------------------------------------
@@ -224,6 +271,8 @@ class OrchestratorAgent:
         def _run_loop() -> AgentState:
             nonlocal messages, events
 
+            log.info("Starting run — query: %r", query[:120])
+            callback = self._langchain_callback()
             retry_count = 0
             research: ResearchResult = {"summary": "", "sources": []}
             evaluation: EvaluationResult = {
@@ -254,7 +303,7 @@ class OrchestratorAgent:
 
                 # Researcher
                 events.append(self._event("tool_call", {"tool": "ResearcherAgent", "query": query}))
-                research, r_events = self.researcher.run(query)
+                research, r_events = self.researcher.run(query, callback=callback)
                 events.extend(r_events)
 
                 # PII guard on research output
@@ -264,13 +313,15 @@ class OrchestratorAgent:
 
                 # Evaluator
                 events.append(self._event("tool_call", {"tool": "EvaluatorAgent"}))
-                evaluation, e_events = self.evaluator.run(query, research)
+                evaluation, e_events = self.evaluator.run(query, research, callback=callback)
                 events.extend(e_events)
 
                 faithfulness = evaluation.get("faithfulness", 0.0)
 
+                log.info("Evaluation — faithfulness=%.2f completeness=%.2f label=%s",
+                         faithfulness, evaluation.get("completeness", 0), evaluation.get("label"))
                 if faithfulness >= self.config.low_confidence_threshold:
-                    # Quality is acceptable — synthesise and finish
+                    log.info("Quality acceptable — synthesising final answer")
                     break
 
                 # Low confidence — retry or escalate
@@ -287,7 +338,7 @@ class OrchestratorAgent:
                     break
 
             # Synthesise final answer
-            final_answer = self._synthesise(query, research, evaluation)
+            final_answer = self._synthesise(query, research, evaluation, callback=callback)
             messages.append(AIMessage(content=final_answer))
 
             return AgentState(

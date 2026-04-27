@@ -121,7 +121,7 @@ class EvaluatorAgent:
     # Public API
     # ------------------------------------------------------------------
 
-    def run(self, query: str, research: ResearchResult) -> tuple[EvaluationResult, list[TraceEvent]]:
+    def run(self, query: str, research: ResearchResult, callback=None) -> tuple[EvaluationResult, list[TraceEvent]]:
         """Score *research* and return an :class:`EvaluationResult` plus trace events.
 
         If the LLM returns malformed JSON, all scores default to 0.5 and
@@ -140,7 +140,11 @@ class EvaluatorAgent:
             HumanMessage(content=prompt),
         ]
 
-        response = self.model.invoke(messages)
+        invoke_kwargs: dict = {}
+        if callback is not None:
+            from langchain_core.runnables import RunnableConfig
+            invoke_kwargs["config"] = RunnableConfig(callbacks=[callback])
+        response = self.model.invoke(messages, **invoke_kwargs)
         raw = getattr(response, "content", str(response))
 
         events.append(self._event("evaluation", {

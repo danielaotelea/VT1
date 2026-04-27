@@ -1,139 +1,122 @@
 # Multi-Agent System
 
-A three-agent **Topic Research & Fact-Check** system used as the **Round 2 subject** for tool evaluations.
-It exercises every multi-agent coordination pattern studied in Phase 0 and every observability
-requirement defined in Phase 1.
-
-> **Status: Milestone 4 — not yet implemented.**
-> This README documents the planned architecture and setup so the environment can be prepared in advance.
-
----
-
-## What it does
-
-The user submits a research question. The system autonomously researches it and returns a cited, evaluated answer.
+A three-agent Research & Fact-Check pipeline used as the **Round 2 subject** for tool evaluations.
 
 ```
-User Input
+User query
     │
     ▼
-Orchestrator Agent
-  - Decomposes the query into sub-tasks
-  - Dispatches to Researcher and Evaluator
-  - Synthesises the final answer
-  - Enforces safety guards (loop detection, HITL escalation)
-    │
-    ├──► Researcher Agent
-    │      Tools: web_search(), fetch_page(), extract_citations()
-    │      Returns: { summary, sources: [{url, excerpt}] }
-    │
-    └──► Evaluator Agent  (LLM-as-judge, GPT-4o-mini, temperature=0)
-           Scores: faithfulness · completeness · guardrail_compliance
-           Drives: hallucination rate metric + Orchestrator re-routing
+OrchestratorAgent
+    ├─► ResearcherAgent  (web search + summarisation)
+    ├─► EvaluatorAgent   (LLM-as-judge scoring)
+    │       faithfulness < threshold → retry (max 2)
+    │       retries exhausted       → HITL escalation flag
+    └─► Synthesise final answer
 ```
 
-Safety guards (implemented as LangGraph conditional edges):
-
-| Guard | Trigger | Action |
-|---|---|---|
-| Loop detection | Same tool called > 3 times | Abort; emit `loop_detected` event |
-| Token explosion | Context grows > 2× between steps | Warn; truncate oldest messages |
-| Sensitive data | API key / credential pattern in output | Block; emit `pii_detected` event |
-| Low confidence | Evaluator faithfulness < 0.6 after 2 retries | Escalate to human (HITL) |
+Safety guards: **loop detection**, **token explosion**, **PII exposure**, **HITL escalation**.
 
 ---
 
 ## Setup
 
-### 1. Create and activate a virtual environment
-
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate      # macOS / Linux
-```
-
-### 2. Install dependencies
-
-```bash
+# From the project root
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Configure environment variables
-
-Copy `.env.example` to `.env` at the project root and fill in your keys:
-
-```bash
-cp .env.example .env
-```
-
-`.env` must contain:
+`.env` must contain at minimum:
 
 ```
 OPENAI_API_KEY=sk-...
-LANGWATCH_API_KEY=...        # primary tracing platform
 ```
 
-Additional keys required for the web search tool (added in Milestone 4):
+Optional for web search (falls back to DuckDuckGo if absent):
 
 ```
-# Add one of the following for ResearcherAgent's web_search tool:
-TAVILY_API_KEY=...           # recommended
-# or SERPAPI_API_KEY=...
+TAVILY_API_KEY=...
 ```
 
-The agent loads `.env` automatically via `python-dotenv`. Never commit `.env`.
+Exporter-specific keys (add whichever you use):
+
+```
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_HOST=http://localhost:3000
+
+PHOENIX_COLLECTOR_ENDPOINT=http://localhost:6006
+
+OPIK_URL_OVERRIDE=http://localhost:5173/api
+OPIK_PROJECT_NAME=vt1-multi-agent
+```
 
 ---
 
-## Run (Milestone 4)
-
-From the **project root** with the virtual environment active:
+## Start the backend
 
 ```bash
-python -c "
-from src.multi_agent.orchestrator import run
-result = run('What are the main observability tools for LLM agents in 2025?')
-print(result)
-"
+source .venv/bin/activate
+uvicorn src.multi_agent.backend:app --reload --port 8001
 ```
+
+Backend API at **http://localhost:8001** — logs every query, evaluation scores, and exporter activations.  
+Swagger docs at **http://localhost:8001/docs**.
+
+## Start the UI
+
+In a separate terminal:
+
+```bash
+source .venv/bin/activate
+python -m src.multi_agent.ui
+```
+
+Gradio UI at **http://localhost:7861**.  
+Select a tracing exporter from the dropdown. Each response shows inline evaluation scores (faithfulness, completeness, label) and a HITL warning when confidence is too low.
 
 ---
 
-## Run the tests (Milestone 4)
+## Observability backends
+
+Start the desired backend before activating its exporter in the UI:
+
+| Exporter | Start command | UI |
+|---|---|---|
+| Langfuse | `bash infra/langfuse/langfuse-run.sh` | http://localhost:3000 |
+| Arize Phoenix | `bash infra/phoenix/phoenix-run.sh` | http://localhost:6006 |
+| Comet Opik | `cd /Users/danielaotelea/Documents/ZHAW/Semester3/VT1/opik && ./opik.sh` | http://localhost:5173 |
+| otel-stdout | — (no service needed) | terminal |
+| none | — | — |
+
+Stop: append `--stop` to the Langfuse and Phoenix scripts; run `./opik.sh --stop` for Opik.
+
+See per-tool setup guides in `infra/`.
+
+---
+
+## Run the tests
 
 ```bash
 pytest tests/multi_agent/ -v
 ```
 
-All tests will inject fake sub-agents and run with `exporter="none"` — no API keys required.
+All 27 tests inject fake models and run with `exporter="none"` — no API keys required.
 
 ---
 
-## Shared state schema (`state.py`)
+## Configuration
 
-All agents communicate via `AgentState`, a typed dict passed through the LangGraph graph:
+All options are in `MultiAgentConfig` (`src/multi_agent/config.py`):
 
-```python
-class AgentState(TypedDict):
-    messages: Annotated[list[BaseMessage], add_messages]
-    trace_events: list[TraceEvent]   # appended by each agent for observability
-    research: dict                   # latest ResearcherAgent output
-    evaluation: dict                 # latest EvaluatorAgent scores
-```
-
-`trace_events` is the coordination audit trail — every agent appends structured events so the
-Orchestrator can detect failures and the observability platform can reconstruct the full
-multi-agent trace.
-
----
-
-## Observability
-
-The same platforms evaluated in Round 1 (Arize Phoenix, Langfuse, Comet Opik) are reconnected
-to this system. The Round 2 evaluation focuses on:
-
-- Inter-agent span correlation (are all agents visible in one trace?)
-- Evaluation metric ingestion (can LangWatch/Langfuse store `faithfulness` scores?)
-- Multi-agent dashboard views (session grouping, per-agent cost breakdown)
-
-Experiment runs and results are recorded in `experiments/multi_agent/`.
+| Field | Default | Description |
+|---|---|---|
+| `orchestrator_model` | `"gpt-4o"` | Model for synthesis |
+| `researcher_model` | `"gpt-4o"` | Model for search & summarisation |
+| `evaluator_model` | `"gpt-4o-mini"` | LLM-as-judge model |
+| `exporter` | `"langwatch"` | Tracing backend |
+| `faithfulness_threshold` | `0.8` | Below → warning span |
+| `low_confidence_threshold` | `0.6` | Below → retry; exhausted → HITL |
+| `max_evaluator_retries` | `2` | Max retries before HITL escalation |
+| `max_identical_tool_calls` | `3` | Loop detection threshold |
+| `max_search_results` | `3` | Max web search results per query |

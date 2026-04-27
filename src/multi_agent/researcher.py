@@ -167,7 +167,7 @@ class ResearcherAgent:
 
         return enriched, events
 
-    def _summarise(self, query: str, context: list[dict]) -> tuple[str, list[TraceEvent]]:
+    def _summarise(self, query: str, context: list[dict], callback=None) -> tuple[str, list[TraceEvent]]:
         """Call the LLM to produce a cited summary from *context*."""
         events: list[TraceEvent] = []
         context_text = "\n\n".join(
@@ -178,7 +178,11 @@ class ResearcherAgent:
             SystemMessage(content=self.SYSTEM_PROMPT),
             HumanMessage(content=f"Query: {query}\n\nSources:\n{context_text}"),
         ]
-        response = self.model.invoke(messages)
+        invoke_kwargs: dict = {}
+        if callback is not None:
+            from langchain_core.runnables import RunnableConfig
+            invoke_kwargs["config"] = RunnableConfig(callbacks=[callback])
+        response = self.model.invoke(messages, **invoke_kwargs)
         raw = getattr(response, "content", str(response))
         events.append(self._event("llm_response", {"model": self.config.researcher_model, "chars": len(raw)}))
         return raw, events
@@ -187,7 +191,7 @@ class ResearcherAgent:
     # Public API
     # ------------------------------------------------------------------
 
-    def run(self, query: str) -> tuple[ResearchResult, list[TraceEvent]]:
+    def run(self, query: str, callback=None) -> tuple[ResearchResult, list[TraceEvent]]:
         """Research *query* and return a :class:`ResearchResult` plus trace events.
 
         The LLM response is expected to be JSON.  If parsing fails the raw
@@ -198,7 +202,7 @@ class ResearcherAgent:
         context, search_events = self._gather_context(query)
         all_events.extend(search_events)
 
-        raw, llm_events = self._summarise(query, context)
+        raw, llm_events = self._summarise(query, context, callback=callback)
         all_events.extend(llm_events)
 
         # Parse JSON response

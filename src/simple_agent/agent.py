@@ -11,6 +11,8 @@ Architecture:
   queried after a run without depending on any external platform.
 """
 
+import logging
+import os
 from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Optional, cast
@@ -25,6 +27,8 @@ from langgraph.graph import add_messages
 from .config import AgentConfig
 
 load_dotenv()
+
+log = logging.getLogger("simple_agent.agent")
 
 
 # ---------------------------------------------------------------------------
@@ -203,34 +207,52 @@ class SimpleAgent:
             try:
                 import langwatch
                 langwatch.setup()
+                log.info("Exporter: langwatch initialised")
                 return langwatch
-            except Exception:
+            except Exception as e:
+                log.warning("Exporter: langwatch failed to initialise: %s", e)
                 return None
 
         if self.config.exporter == "langfuse":
             try:
-                from langfuse.callback import CallbackHandler
-                return CallbackHandler()
-            except Exception:
+                from langfuse.langchain import CallbackHandler
+                handler = CallbackHandler()
+                log.info("Exporter: langfuse initialised")
+                return handler
+            except Exception as e:
+                log.warning("Exporter: langfuse failed to initialise: %s", e)
                 return None
 
         if self.config.exporter == "phoenix":
             try:
-                import phoenix as px
+                from phoenix.otel import register
                 from openinference.instrumentation.langchain import LangChainInstrumentor
-                px.launch_app()
-                LangChainInstrumentor().instrument()
-                return px
-            except Exception:
+                # Explicitly set the full OTLP HTTP trace path so Langfuse's
+                # OTEL_EXPORTER_OTLP_ENDPOINT env var (port 3000) is not picked up.
+                base = os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006")
+                endpoint = f"{base.rstrip('/')}/v1/traces"
+                tracer_provider = register(
+                    project_name="vt1-simple-agent",
+                    endpoint=endpoint,
+                )
+                LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
+                log.info("Exporter: phoenix initialised (endpoint=%s)", endpoint)
+                return tracer_provider
+            except Exception as e:
+                log.warning("Exporter: phoenix failed to initialise: %s", e)
                 return None
 
         if self.config.exporter == "opik":
             try:
                 import opik
-                opik.configure(use_local=True)
                 from opik.integrations.langchain import OpikTracer
-                return OpikTracer()
-            except Exception:
+                project = os.getenv("OPIK_PROJECT_NAME", "vt1-simple-agent")
+                url = os.getenv("OPIK_URL_OVERRIDE", "http://localhost:5173/api")
+                tracer = OpikTracer(project_name=project)
+                log.info("Exporter: opik initialised (project=%s, url=%s)", project, url)
+                return tracer
+            except Exception as e:
+                log.warning("Exporter: opik failed to initialise: %s", e)
                 return None
 
         if self.config.exporter == "otel-stdout":
@@ -241,11 +263,13 @@ class SimpleAgent:
                 provider = TracerProvider()
                 provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
                 otel_trace.set_tracer_provider(provider)
+                log.info("Exporter: otel-stdout initialised")
                 return provider
-            except Exception:
+            except Exception as e:
+                log.warning("Exporter: otel-stdout failed to initialise: %s", e)
                 return None
 
-        # "none" requires no setup
+        log.info("Exporter: none (tracing disabled)")
         return None
 
     def _langchain_callback(self):
@@ -272,6 +296,7 @@ class SimpleAgent:
     # ------------------------------------------------------------------
 
     def _call_llm(self, messages: list[BaseMessage]) -> BaseMessage:
+        log.info("LLM call — %d message(s) in context", len(messages) + 1)
         callback = self._langchain_callback()
         invoke_kwargs: dict = {}
         if callback is not None:
@@ -282,12 +307,20 @@ class SimpleAgent:
             **invoke_kwargs,
         )
         self.cost_tracker.record(response)
+        tool_calls = getattr(response, "tool_calls", []) or []
+        if tool_calls:
+            log.info("LLM requested tool calls: %s", [tc["name"] for tc in tool_calls])
+        else:
+            log.info("LLM final answer: %r", getattr(response, "content", "")[:120])
         return response
 
     def _call_tool(self, tool_call: dict):
         """Invoke a single tool and return the resulting ToolMessage."""
+        log.info("Tool call: %s(%s)", tool_call["name"], tool_call.get("args", {}))
         tool_fn = self.tools_by_name[tool_call["name"]]
-        return tool_fn.invoke(tool_call)
+        result = tool_fn.invoke(tool_call)
+        log.info("Tool result: %s", getattr(result, "content", result))
+        return result
 
     def invoke(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Run the ReAct loop to completion and return the full message list.

@@ -26,3 +26,25 @@ practical examples and best practices.
 ---
 
 ## Contributing
+
+
+## Observation
+comparison 
+    -> reasoning mistakes of the research 
+        -> alarms 
+    -> tool usage 
+        -> wrong tool 
+        -> wrong args 
+        -> hallucinated calls
+    -> multi-agent coordination
+        -> missing context
+        -> misattributed messages
+qualitative analysis what they offer and some experiments 
+    -> reasoning traces 
+    -> tool calls 
+    -> agent messages
+
+add also the open telemetry standard 
+Which one I prefer ->  
+Langwatch Langtrace => reasoning why not there 
+Limitations on the deployment techniques for the multi-agent system (e.g. serverless, edge, etc.)

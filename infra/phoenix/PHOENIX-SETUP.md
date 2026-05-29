@@ -1,6 +1,6 @@
 # Arize Phoenix — Local Setup
 
-Phoenix runs as a single Docker container — no Compose file needed.
+Phoenix runs via Docker Compose (`infra/phoenix/docker-compose.yml`).
 
 ## Prerequisites
 
@@ -10,12 +10,17 @@ Phoenix runs as a single Docker container — no Compose file needed.
 ## Start / Stop
 
 ```bash
-# Start (UI at http://localhost:6006)
-bash infra/phoenix/phoenix-run.sh
+# Start (UI at http://localhost:6006) — traces persisted in Docker volume
+docker compose -f infra/phoenix/docker-compose.yml up -d
 
-# Stop
-bash infra/phoenix/phoenix-run.sh --stop
+# Stop (data kept in volume)
+docker compose -f infra/phoenix/docker-compose.yml down
+
+# Stop and delete all trace data (full reset)
+docker compose -f infra/phoenix/docker-compose.yml down -v
 ```
+
+Trace data is stored in the Docker named volume `phoenix_data` and survives container restarts.
 
 | Endpoint   | URL                  |
 |------------|----------------------|

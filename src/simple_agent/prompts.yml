@@ -1,0 +1,6 @@
+# Prompts for the simple arithmetic agent.
+
+simple_agent:
+  system: |
+    You are a helpful assistant tasked with performing arithmetic.
+    Use the provided tools to compute the answer.

@@ -3,6 +3,7 @@
 import logging
 import os
 import time
+import uuid
 from contextlib import asynccontextmanager
 from typing import Literal
 
@@ -47,7 +48,7 @@ def get_agent(exporter: ExporterName) -> SimpleAgent:
         log.info("Initialising agent  exporter=%r", exporter)
         log.info("Collector URL      : %s", EXPORTER_URLS.get(exporter, "unknown"))
         agent = build_agent(config=AgentConfig(exporter=exporter))
-        log.info("Exporter active    : %s", agent._exporter is not None)
+        log.info("Exporter active    : %s", agent._adapter.active)
         log.info("─" * 60)
         _agents[exporter] = agent
     return _agents[exporter]
@@ -73,6 +74,7 @@ app = FastAPI(title="Simple Agent API", lifespan=lifespan)
 class ChatRequest(BaseModel):
     message: str
     exporter: ExporterName = "none"
+    session_id: str = ""
 
 
 class ChatResponse(BaseModel):
@@ -99,7 +101,7 @@ def activate_exporter(name: ExporterName) -> ExporterStatus:
     agent = get_agent(name)
     status = ExporterStatus(
         exporter=name,
-        active=agent._exporter is not None,
+        active=agent._adapter.active,
         collector_url=url,
     )
     log.info("Exporter activated: %s (active=%s, url=%s)", name, status.active, status.collector_url)
@@ -108,8 +110,9 @@ def activate_exporter(name: ExporterName) -> ExporterStatus:
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
-    log.info("[%s] Received: %r", request.exporter, request.message)
+    session_id = request.session_id or str(uuid.uuid4())
+    log.info("[%s] session=%s Received: %r", request.exporter, session_id, request.message)
     t0 = time.perf_counter()
-    response = main(request.message, agent=get_agent(request.exporter))
-    log.info("[%s] Done in %.2fs", request.exporter, time.perf_counter() - t0)
+    response = main(request.message, agent=get_agent(request.exporter), session_id=session_id)
+    log.info("[%s] session=%s Done in %.2fs", request.exporter, session_id, time.perf_counter() - t0)
     return ChatResponse(response=response)

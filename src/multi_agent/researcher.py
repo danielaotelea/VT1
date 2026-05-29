@@ -19,14 +19,16 @@ Output schema::
 
 import json
 import re
-from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Optional
 
 from dotenv import load_dotenv
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
 from .config import MultiAgentConfig
-from .state import ResearchResult, TraceEvent
+from .otel_utils import set_token_cost_attributes as _set_token_cost_attributes
+from .prompts import PROMPTS
+from .state import ResearchResult, TraceEvent, make_event
 
 load_dotenv()
 
@@ -55,9 +57,12 @@ def _default_web_search(query: str, max_results: int = 3) -> list[dict]:
         except Exception:
             pass
 
-    # DuckDuckGo fallback via ddgs
+    # DuckDuckGo fallback via ddgs (package renamed from duckduckgo_search to ddgs)
     try:
-        from duckduckgo_search import DDGS
+        try:
+            from ddgs import DDGS
+        except ImportError:
+            from duckduckgo_search import DDGS
         with DDGS() as ddgs:
             results = list(ddgs.text(query, max_results=max_results))
         return [
@@ -107,12 +112,7 @@ class ResearcherAgent:
         Shared ``MultiAgentConfig``.
     """
 
-    SYSTEM_PROMPT = (
-        "You are a research assistant. Given a query, produce a concise, "
-        "well-cited summary. Base every claim strictly on the source material "
-        "provided. Return your answer as JSON with keys 'summary' and 'sources'. "
-        "'sources' must be a list of objects with 'url' and 'excerpt' keys."
-    )
+    SYSTEM_PROMPT = PROMPTS.researcher_system
 
     def __init__(
         self,
@@ -138,32 +138,28 @@ class ResearcherAgent:
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _ts(self) -> str:
-        return datetime.now(timezone.utc).isoformat()
-
-    def _event(self, event_type: str, payload: dict) -> TraceEvent:
-        return TraceEvent(
-            timestamp=self._ts(),
-            agent="researcher",
-            event_type=event_type,
-            payload=payload,
-        )
-
     def _gather_context(self, query: str) -> tuple[list[dict], list[TraceEvent]]:
-        """Run web_search + fetch_page and return raw results + trace events."""
+        """Run web_search then fetch all pages concurrently, preserving result order."""
         events: list[TraceEvent] = []
         results = self.search_fn(query, self.config.max_search_results)
-        events.append(self._event("tool_call", {"tool": "web_search", "query": query, "n_results": len(results)}))
+        events.append(make_event("researcher","tool_call", {"tool": "web_search", "query": query, "n_results": len(results)}))
+
+        urls = [r.get("url", "") for r in results]
+        workers = max(1, sum(1 for u in urls if u))
+
+        def _fetch(url: str) -> str:
+            return self.fetch_fn(url, self.config.max_page_chars) if url else ""
+
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            page_texts = list(pool.map(_fetch, urls))
 
         enriched: list[dict] = []
-        for r in results:
-            url = r.get("url", "")
-            if not url:
+        for r, url, page_text in zip(results, urls, page_texts):
+            if url:
+                events.append(make_event("researcher","tool_call", {"tool": "fetch_page", "url": url}))
+                enriched.append({**r, "page_text": page_text})
+            else:
                 enriched.append(r)
-                continue
-            page_text = self.fetch_fn(url, self.config.max_page_chars)
-            events.append(self._event("tool_call", {"tool": "fetch_page", "url": url}))
-            enriched.append({**r, "page_text": page_text})
 
         return enriched, events
 
@@ -184,7 +180,18 @@ class ResearcherAgent:
             invoke_kwargs["config"] = RunnableConfig(callbacks=[callback])
         response = self.model.invoke(messages, **invoke_kwargs)
         raw = getattr(response, "content", str(response))
-        events.append(self._event("llm_response", {"model": self.config.researcher_model, "chars": len(raw)}))
+        usage = getattr(response, "usage_metadata", None)
+        token_payload: dict = {"model": self.config.researcher_model, "chars": len(raw)}
+        if usage:
+            input_t = usage.get("input_tokens", 0)
+            output_t = usage.get("output_tokens", 0)
+            cost = (
+                input_t * self.config.input_token_price_per_million / 1_000_000
+                + output_t * self.config.output_token_price_per_million / 1_000_000
+            )
+            token_payload.update({"input_tokens": input_t, "output_tokens": output_t, "cost_usd": cost})
+            _set_token_cost_attributes(input_t, output_t, cost)
+        events.append(make_event("researcher","llm_response", token_payload))
         return raw, events
 
     # ------------------------------------------------------------------
@@ -208,7 +215,7 @@ class ResearcherAgent:
         # Parse JSON response
         try:
             # Strip markdown code fences if present
-            cleaned = re.sub(r"```(?:json)?\s*", "", raw).strip().rstrip("```").strip()
+            cleaned = re.sub(r"```(?:json)?\s*|\s*```", "", raw).strip()
             parsed = json.loads(cleaned)
             result: ResearchResult = {
                 "summary": parsed.get("summary", raw),

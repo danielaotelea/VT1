@@ -3,6 +3,7 @@
 import logging
 import os
 import time
+import uuid
 from contextlib import asynccontextmanager
 from typing import Literal
 
@@ -45,7 +46,7 @@ def get_agent(exporter: ExporterName) -> OrchestratorAgent:
         log.info("Initialising OrchestratorAgent  exporter=%r", exporter)
         log.info("Collector URL                  : %s", EXPORTER_URLS.get(exporter, "unknown"))
         agent = OrchestratorAgent(config=MultiAgentConfig(exporter=exporter))
-        log.info("Exporter active                : %s", agent._exporter is not None)
+        log.info("Exporter active                : %s", agent._adapter.active)
         log.info("─" * 60)
         _agents[exporter] = agent
     return _agents[exporter]
@@ -70,6 +71,7 @@ app = FastAPI(title="Multi-Agent Research API", lifespan=lifespan)
 class ChatRequest(BaseModel):
     query: str
     exporter: ExporterName = "none"
+    session_id: str = ""
 
 
 class ChatResponse(BaseModel):
@@ -88,6 +90,14 @@ class ExporterStatus(BaseModel):
     collector_url: str
 
 
+@app.delete("/session/{session_id}", status_code=204)
+def reset_session(session_id: str) -> None:
+    """Discard the conversation history for *session_id* on all active agents."""
+    for agent in _agents.values():
+        agent.reset_history(session_id)
+    log.info("Conversation history reset for session=%s", session_id)
+
+
 @app.post("/exporter/{name}", response_model=ExporterStatus)
 def activate_exporter(name: ExporterName) -> ExporterStatus:
     url = EXPORTER_URLS.get(name, "—")
@@ -97,20 +107,23 @@ def activate_exporter(name: ExporterName) -> ExporterStatus:
             log.warning("Exporter %r endpoint not reachable: %s", name, url_msg)
             return ExporterStatus(exporter=name, active=False, collector_url=f"failed — {url_msg}")
     agent = get_agent(name)
-    status = ExporterStatus(exporter=name, active=agent._exporter is not None, collector_url=url)
+    status = ExporterStatus(exporter=name, active=agent._adapter.active, collector_url=url)
     log.info("Exporter activated: %s (active=%s, url=%s)", name, status.active, status.collector_url)
     return status
 
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
-    log.info("[%s] Query: %r", request.exporter, request.query[:120])
+    session_id = request.session_id or str(uuid.uuid4())
+    log.info("[%s] session=%s Query: %r", request.exporter, session_id, request.query[:120])
     t0 = time.perf_counter()
-    state = get_agent(request.exporter).run(request.query)
+    # run_turn maintains per-session conversation history; a stable session_id
+    # across requests enables multi-turn follow-up questions.
+    state = get_agent(request.exporter).run_turn(request.query, session_id=session_id)
     elapsed = time.perf_counter() - t0
     evaluation = state["evaluation"]
-    log.info("[%s] Done in %.2fs — faithfulness=%.2f hitl=%s",
-             request.exporter, elapsed, evaluation.get("faithfulness", 0), state["hitl_required"])
+    log.info("[%s] session=%s Done in %.2fs — faithfulness=%.2f hitl=%s",
+             request.exporter, session_id, elapsed, evaluation.get("faithfulness", 0), state["hitl_required"])
     return ChatResponse(
         final_answer=state["final_answer"],
         faithfulness=evaluation.get("faithfulness", 0.0),

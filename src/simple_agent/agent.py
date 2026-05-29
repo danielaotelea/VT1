@@ -12,7 +12,6 @@ Architecture:
 """
 
 import logging
-import os
 from collections import Counter
 from dataclasses import dataclass
 from typing import Any, Optional, cast
@@ -22,9 +21,14 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
+
+from .prompts import PROMPTS
 from langgraph.graph import add_messages
 
 from .config import AgentConfig
+from .exporter import ExporterAdapter, build_exporter
+from src.otel_utils import record_exception as _record_exception
+from src.otel_utils import set_token_cost_attributes as _set_token_cost_attributes
 
 load_dotenv()
 
@@ -124,6 +128,7 @@ class CostTracker:
             output_tokens=output_tokens,
             cost_usd=cost,
         ))
+        _set_token_cost_attributes(input_tokens, output_tokens, cost)
 
     def total_cost(self) -> float:
         """Total USD cost across all recorded calls."""
@@ -161,10 +166,7 @@ class SimpleAgent:
     run standalone or embedded inside a LangGraph graph.
     """
 
-    SYSTEM_PROMPT = (
-        "You are a helpful assistant tasked with performing arithmetic. "
-        "Use the provided tools to compute the answer."
-    )
+    SYSTEM_PROMPT = PROMPTS.system
 
     def __init__(
         self,
@@ -190,114 +192,15 @@ class SimpleAgent:
             else resolved_model
         )
 
-        self._exporter = self._init_exporter()
-
-    # ------------------------------------------------------------------
-    # Exporter setup
-    # ------------------------------------------------------------------
-
-    def _init_exporter(self):
-        """Initialise the tracing backend selected by config.exporter.
-
-        Returns the exporter module/object on success, or None on failure
-        (missing API key, import error). The agent always runs; tracing is
-        best-effort.
-        """
-        if self.config.exporter == "langwatch":
-            try:
-                import langwatch
-                langwatch.setup()
-                log.info("Exporter: langwatch initialised")
-                return langwatch
-            except Exception as e:
-                log.warning("Exporter: langwatch failed to initialise: %s", e)
-                return None
-
-        if self.config.exporter == "langfuse":
-            try:
-                from langfuse.langchain import CallbackHandler
-                handler = CallbackHandler()
-                log.info("Exporter: langfuse initialised")
-                return handler
-            except Exception as e:
-                log.warning("Exporter: langfuse failed to initialise: %s", e)
-                return None
-
-        if self.config.exporter == "phoenix":
-            try:
-                from phoenix.otel import register
-                from openinference.instrumentation.langchain import LangChainInstrumentor
-                # Explicitly set the full OTLP HTTP trace path so Langfuse's
-                # OTEL_EXPORTER_OTLP_ENDPOINT env var (port 3000) is not picked up.
-                base = os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006")
-                endpoint = f"{base.rstrip('/')}/v1/traces"
-                tracer_provider = register(
-                    project_name="vt1-simple-agent",
-                    endpoint=endpoint,
-                )
-                LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
-                log.info("Exporter: phoenix initialised (endpoint=%s)", endpoint)
-                return tracer_provider
-            except Exception as e:
-                log.warning("Exporter: phoenix failed to initialise: %s", e)
-                return None
-
-        if self.config.exporter == "opik":
-            try:
-                import opik
-                from opik.integrations.langchain import OpikTracer
-                project = os.getenv("OPIK_PROJECT_NAME", "vt1-simple-agent")
-                url = os.getenv("OPIK_URL_OVERRIDE", "http://localhost:5173/api")
-                tracer = OpikTracer(project_name=project)
-                log.info("Exporter: opik initialised (project=%s, url=%s)", project, url)
-                return tracer
-            except Exception as e:
-                log.warning("Exporter: opik failed to initialise: %s", e)
-                return None
-
-        if self.config.exporter == "otel-stdout":
-            try:
-                from opentelemetry import trace as otel_trace
-                from opentelemetry.sdk.trace import TracerProvider
-                from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter
-                provider = TracerProvider()
-                provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
-                otel_trace.set_tracer_provider(provider)
-                log.info("Exporter: otel-stdout initialised")
-                return provider
-            except Exception as e:
-                log.warning("Exporter: otel-stdout failed to initialise: %s", e)
-                return None
-
-        log.info("Exporter: none (tracing disabled)")
-        return None
-
-    def _langchain_callback(self):
-        """Return a LangChain callback for the active trace, or None.
-
-        - langwatch: obtains the per-trace callback from the active trace context.
-        - langfuse: the CallbackHandler stored in _exporter is used directly.
-        - opik: the OpikTracer stored in _exporter is used directly.
-        - phoenix: auto-instruments via OpenInference; no per-call callback needed.
-        """
-        if self._exporter is None:
-            return None
-        if self.config.exporter == "langwatch":
-            try:
-                return self._exporter.get_current_trace().get_langchain_callback()
-            except Exception:
-                return None
-        if self.config.exporter in ("langfuse", "opik"):
-            return self._exporter
-        return None
+        self._adapter: ExporterAdapter = build_exporter(self.config)
 
     # ------------------------------------------------------------------
     # Core loop
     # ------------------------------------------------------------------
 
-    def _call_llm(self, messages: list[BaseMessage]) -> BaseMessage:
+    def _call_llm(self, messages: list[BaseMessage], session_id: Optional[str] = None) -> BaseMessage:
         log.info("LLM call — %d message(s) in context", len(messages) + 1)
-        callback = self._langchain_callback()
+        callback = self._adapter.callback(session_id=session_id)
         invoke_kwargs: dict = {}
         if callback is not None:
             invoke_kwargs["config"] = RunnableConfig(callbacks=[callback])
@@ -305,7 +208,7 @@ class SimpleAgent:
         response = self.model.invoke(
             [SystemMessage(content=self.SYSTEM_PROMPT)] + messages,
             **invoke_kwargs,
-        )
+        )  # type: ignore[call-overload]
         self.cost_tracker.record(response)
         tool_calls = getattr(response, "tool_calls", []) or []
         if tool_calls:
@@ -322,7 +225,7 @@ class SimpleAgent:
         log.info("Tool result: %s", getattr(result, "content", result))
         return result
 
-    def invoke(self, messages: list[BaseMessage]) -> list[BaseMessage]:
+    def invoke(self, messages: list[BaseMessage], session_id: Optional[str] = None) -> list[BaseMessage]:
         """Run the ReAct loop to completion and return the full message list.
 
         Raises:
@@ -331,10 +234,9 @@ class SimpleAgent:
         """
         tool_call_counts: Counter = Counter()
 
-        # Optionally wrap the entire run in a LangWatch trace
         def _run():
             nonlocal messages
-            model_response = self._call_llm(messages)
+            model_response = self._call_llm(messages, session_id=session_id)
 
             while True:
                 tool_calls = getattr(model_response, "tool_calls", None) or []
@@ -345,26 +247,30 @@ class SimpleAgent:
                 for tc in tool_calls:
                     tool_call_counts[tc["name"]] += 1
                     if tool_call_counts[tc["name"]] > self.config.max_identical_tool_calls:
-                        raise LoopDetectedError(
+                        exc = LoopDetectedError(
                             f"Tool '{tc['name']}' called "
                             f"{tool_call_counts[tc['name']]} times — "
                             f"limit is {self.config.max_identical_tool_calls}."
                         )
+                        _record_exception(exc)
+                        raise exc
 
                 tool_results = [self._call_tool(tc) for tc in tool_calls]
                 messages = cast(list[BaseMessage], add_messages(messages, [model_response, *tool_results]))  # type: ignore
-                model_response = self._call_llm(messages)
+                model_response = self._call_llm(messages, session_id=session_id)
 
             return cast(list[BaseMessage], add_messages(messages, model_response))  # type: ignore
 
-        if self.config.exporter == "langwatch" and self._exporter is not None:
-            try:
-                with self._exporter.trace(name="Arithmetic Agent"):
-                    return _run()
-            except Exception:
-                pass
+        trace_ctx = getattr(self._adapter, "trace_ctx", None)
+        if trace_ctx is not None:
+            from contextlib import suppress
+            with suppress(Exception):
+                with trace_ctx("Arithmetic Agent"):
+                    with self._adapter.session_ctx(session_id):
+                        return _run()
 
-        return _run()
+        with self._adapter.session_ctx(session_id):
+            return _run()
 
     def stream(self, messages: list[BaseMessage]):
         """Yield per-message updates (mirrors LangGraph stream_mode='updates')."""
@@ -393,7 +299,7 @@ def build_agent(
     return SimpleAgent(model=model, tools=tools, config=config)
 
 
-def main(prompt: str, agent: Optional[SimpleAgent] = None) -> str:
+def main(prompt: str, agent: Optional[SimpleAgent] = None, session_id: Optional[str] = None) -> str:
     """Run the agent on *prompt* and return a human-readable trace string.
 
     The string includes every message in the final message list so callers can
@@ -408,7 +314,7 @@ def main(prompt: str, agent: Optional[SimpleAgent] = None) -> str:
         agent = build_agent()
 
     messages: list[BaseMessage] = cast(list[BaseMessage], [HumanMessage(content=prompt)])
-    result = agent.invoke(messages)
+    result = agent.invoke(messages, session_id=session_id)
 
     parts: list[str] = []
     for msg in result:

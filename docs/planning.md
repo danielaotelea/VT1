@@ -3,62 +3,92 @@
 ## Phase 0: Understanding what is an AI agent and its components
 
 ### Goal: Understand the key components of an AI agent
-- Description: Identify the reasoning engine, tool integration points, and multi-agent coordination mechanisms.
-- Subtasks:
-  - [x] Review existing literature and documentation on AI agents to identify common architectures and functionalities.
-  - [x] Define the core components of an AI agent and their interactions (memory, planning, tools, interfaces).
-  - [x] Summarize findings in a short memo (1-2 pages) with references.
+- [x] Review existing literature on AI agent architectures.
+- [x] Define core components (memory, planning, tools, interfaces).
+- [x] Summarize findings in a short memo with references.
+
+---
 
 ## Phase 1: Observability Requirements Definition
 
 ### Goal: Define what to measure and why
-- Description: Capture observability goals for reasoning traceability, governance, performance, quality, and safety.
-- Subtasks:
-  - [x] Document the key observability requirement areas (reasoning trace, multi-agent coordination, governance, performance, quality, safety).
-  - [x] For each requirement area, define specific metrics, logs, events, and traces needed.
-  - [x] Identify retention, privacy, and security requirements for observability data.
+- [x] Document key observability requirement areas (reasoning trace, multi-agent coordination, governance, performance, quality, safety).
+- [x] For each area, define specific metrics, logs, events, and traces needed.
+- [x] Identify retention, privacy, and security requirements.
+
+---
 
 ## Phase 2: Tooling Landscape Analysis
 
 ### Goal: Identify and evaluate open-source tools for observability
-- Description: Produce a comparative analysis of candidate tools and how they fit the defined requirements.
-- Subtasks:
-  - [x] Produce an inventory of relevant tools (e.g., Arize Phoenix, Langfuse, Langtrace, Opik)
-  - [x] Select a small set of tools to prototype with, and justify the choice.
-  - [x] For each tool, evaluate integration capabilities (libraries, ingestion formats, exporters) and ease of integration with agents.
-  - [ ] Document strengths, limitations, license constraints, and operational considerations for each tool.
+- [x] Produce an inventory of relevant tools (Arize Phoenix, Langfuse, Langfuse, Opik).
+- [x] Select a small set of tools to prototype with, and justify the choice.
+- [x] Evaluate integration capabilities for each tool.
+- [ ] Document strengths, limitations, license constraints, and operational considerations. ← M3 + M5
+
+---
 
 ## Phase 3: Implementation and Evaluation
 
-### Goal A: Implement a prototype AI agent with observability
-- Description: Build a minimal agent that emits the defined observability artifacts.
-- Subtasks:
-  - [ ] Develop a prototype AI agent that incorporates the identified observability metrics, logs, and traces.
-  - [ ] Instrument key reasoning steps so reasoning traces, decisions, and tool calls are recorded.
-  - [ ] Add configuration options for sampling, verbosity, and exporters.
-  - [ ] Write unit/integration tests for the instrumentation (happy path + 1-2 edge cases).
+### Goal A: Simple agent with observability — ✅ Complete
 
-### Goal B: Implement a multi-agent workload and integrate observability
-- Description: Create a small multi-agent scenario to exercise coordination and tool usage.
-- Subtasks:
-  - [ ] Design and implement a multi-agent workload that simulates real coordination scenarios.
-  - [ ] Integrate the observability features into the multi-agent system to capture inter-agent events and correlations.
-  - [ ] Run experiments and collect data across multiple runs to validate metrics and traces.
-  - [ ] Analyze collected data to assess transparency, coordination correctness, and performance bottlenecks.
+- [x] Implement `src/simple_agent/agent.py` — ReAct loop with `add`, `multiply`, `divide` tools.
+- [x] Implement `src/simple_agent/config.py` — `AgentConfig` with pluggable exporter.
+- [x] Implement `src/simple_agent/backend.py` — FastAPI on port 8000; `/chat` + `/exporter/{name}` endpoints; reachability checks; structured logging.
+- [x] Implement `src/simple_agent/ui.py` — Gradio on port 7860; exporter dropdown with live status; examples table.
+- [x] Wire all exporters: Langfuse (langfuse 4.x), Arize Phoenix (OTLP HTTP), Comet Opik (env-driven), otel-stdout, none.
+- [x] Add logging throughout agent and backend (exporter init, LLM calls, tool calls, response time).
+- [x] 18 tests passing (`tests/simple_agent/`).
+- [x] `src/simple_agent/README.md` — start backend, start UI, exporter table.
 
-### Goal C: Configure visualization and correlation
-- Description: Configure dashboards and traces to visualize agent reasoning and cross-service correlations.
-- Subtasks:
-  - [ ] Build example dashboards (metrics + logs + traces) to show agent health, latency, and decision traces.
-  - [ ] Configure trace correlation between agent actions, tool calls, and downstream services.
-  - [ ] Produce a short how-to guide for interpreting dashboards and traces.
+### Goal B: Multi-agent system with observability — ✅ Complete
 
-## Phase 4: Evaluation, Best Practices and Documentation
+- [x] Implement `src/multi_agent/orchestrator.py` — `OrchestratorAgent` with all safety guards (loop detection, token explosion, PII, HITL).
+- [x] Implement `src/multi_agent/researcher.py` — web search (DuckDuckGo / Tavily fallback) + page fetch + cited summarisation.
+- [x] Implement `src/multi_agent/evaluator.py` — LLM-as-judge (faithfulness, completeness, guardrail compliance).
+- [x] Implement `src/multi_agent/backend.py` — FastAPI on port 8001; returns evaluation scores + HITL flag; same exporter activation pattern as simple agent.
+- [x] Implement `src/multi_agent/ui.py` — Gradio on port 7861; evaluation scores displayed inline; examples table.
+- [x] Fix exporters in `OrchestratorAgent`: Langfuse 4.x import, Phoenix full OTLP path, Opik env-driven config.
+- [x] Add structured logging throughout orchestrator.
+- [x] 27 tests passing (`tests/multi_agent/`).
+- [x] `src/multi_agent/README.md` — start backend, start UI, exporter table.
 
-### Goal: Evaluate implementation and capture best practices
-- Description: Consolidate learnings and provide guidance for production-grade observability of agents.
-- Subtasks:
-  - [ ] Evaluate the overall effectiveness of the implemented observability features (transparency, efficiency, safety).
-  - [ ] Document best practices for monitoring AI agents, including tool selection, metric definitions, and logging strategies.
-  - [ ] Derive architectural patterns and operational recommendations for "production-grade" agent observability.
-  - [ ] Produce a short final report and a README for the prototype that includes setup and evaluation instructions.
+### Goal B2: Observability infrastructure — ✅ Complete
+
+- [x] `infra/langfuse/langfuse-run.sh` — start / `--stop` (cd to cloned repo + docker compose).
+- [x] `infra/langfuse/LANGFUSE-SETUP.md` — org `vt1-agents`, project `research`, API keys in `.env`.
+- [x] `infra/phoenix/phoenix-run.sh` — named container start / `--stop`.
+- [x] `infra/phoenix/PHOENIX-SETUP.md` — project created, `PHOENIX_COLLECTOR_ENDPOINT` in `.env`.
+- [x] `infra/opik/OPIK-SETUP.md` — `./opik.sh` start/stop, project `vt1-simple-agent`, env vars in `.env`.
+- [x] `infra/README.md` — port summary, per-tool quick start.
+- [x] All three tools verified reachable (backend reachability check on exporter activation).
+
+### Goal B3: Tooling verified against simple agent — 🔄 In Progress (M3)
+
+- [x] Langfuse: running, project created, API keys set, traces confirmed in UI.
+- [x] Arize Phoenix: running, project created, endpoint confirmed at `http://localhost:6006/v1/traces`.
+- [x] Comet Opik: running, project `vt1-simple-agent` created, endpoint confirmed.
+- [ ] Run ≥5 structured experiment sessions per tool (simple agent).
+- [ ] Export trace data to `experiments/simple_agent/runs/`.
+- [ ] Fill Round 1 sections in `docs/phase-2.1.1-arize-phoenix-evaluation.md`.
+- [ ] Fill Round 1 sections in `docs/phase-2.1.2-langfuse-evaluation.md`.
+- [ ] Fill Round 1 sections in `docs/phase-2.1.3-comet-opik-evaluation.md`.
+- [ ] Write `experiments/simple_agent/results.md` — observations, screenshots, raw findings.
+
+### Goal C: Configure visualisation and correlation — 🔄 In Progress (M3 + M5)
+
+- [ ] Capture dashboards per tool showing agent health, latency, tool-call spans.
+- [ ] Configure trace correlation between agent actions, tool calls, downstream services.
+- [ ] Produce a how-to guide for interpreting dashboards and traces. ← M6
+
+---
+
+## Phase 4: Evaluation, Best Practices and Documentation — ⏳ Pending (M5 + M6)
+
+- [ ] Run ≥10 multi-agent experiment sessions per tool; export traces.
+- [ ] Fill Round 2 sections in `docs/phase-2.1.1/2/3-*.md`.
+- [ ] Write `docs/phase-2.2-tool-comparison-summary.md` — cross-tool matrix Round 1 vs Round 2.
+- [ ] Analyse experiment data (latency P95/P99, hallucination rate, cost per role, guardrail trigger counts).
+- [ ] Write `docs/phase-4.0-best-practices.md` — tool selection, metric definitions, production recommendations.
+- [ ] Write `docs/phase-4.1-final-report.md` — full project summary, results, lessons learned.
+- [ ] Prepare presentation slides and live demo walkthrough.

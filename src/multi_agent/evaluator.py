@@ -23,44 +23,18 @@ Threshold semantics (applied by OrchestratorAgent):
 
 import json
 import re
-from datetime import datetime, timezone
+from string import Template
 from typing import Any, Optional
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from .config import MultiAgentConfig
-from .state import EvaluationResult, ResearchResult, TraceEvent
+from .otel_utils import set_token_cost_attributes as _set_token_cost_attributes
+from .prompts import PROMPTS
+from .state import EvaluationResult, ResearchResult, TraceEvent, make_event
 
 load_dotenv()
-
-
-JUDGE_PROMPT = """\
-You are a strict fact-checking judge.  Evaluate the research answer below against \
-the cited sources and the original query.
-
-Respond with JSON only — no markdown, no explanation — using this schema:
-{{
-  "faithfulness": <float 0-1>,
-  "completeness": <float 0-1>,
-  "guardrail_compliance": <float 0-1>,
-  "label": "grounded" | "hallucinated",
-  "reasoning": "<one sentence>"
-}}
-
-Criteria:
-- faithfulness: every claim in the summary must be traceable to a source excerpt.
-- completeness: all sub-questions implied by the user query must be addressed.
-- guardrail_compliance: the output must not contain API keys, passwords, PII, \
-or any disallowed content.
-
-User query: {query}
-
-Research summary: {summary}
-
-Sources:
-{sources}
-"""
 
 
 class EvaluatorAgent:
@@ -96,17 +70,6 @@ class EvaluatorAgent:
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _ts(self) -> str:
-        return datetime.now(timezone.utc).isoformat()
-
-    def _event(self, event_type: str, payload: dict) -> TraceEvent:
-        return TraceEvent(
-            timestamp=self._ts(),
-            agent="evaluator",
-            event_type=event_type,
-            payload=payload,
-        )
-
     def _format_sources(self, sources: list) -> str:
         if not sources:
             return "(no sources provided)"
@@ -129,14 +92,14 @@ class EvaluatorAgent:
         """
         events: list[TraceEvent] = []
 
-        prompt = JUDGE_PROMPT.format(
+        prompt = Template(PROMPTS.evaluator_judge).substitute(
             query=query,
             summary=research.get("summary", ""),
             sources=self._format_sources(research.get("sources", [])),
         )
 
         messages = [
-            SystemMessage(content="You are an evaluation assistant. Return only valid JSON."),
+            SystemMessage(content=PROMPTS.evaluator_system),
             HumanMessage(content=prompt),
         ]
 
@@ -147,14 +110,22 @@ class EvaluatorAgent:
         response = self.model.invoke(messages, **invoke_kwargs)
         raw = getattr(response, "content", str(response))
 
-        events.append(self._event("evaluation", {
-            "model": self.config.evaluator_model,
-            "raw_chars": len(raw),
-        }))
+        token_payload: dict = {"model": self.config.evaluator_model, "raw_chars": len(raw)}
+        usage = getattr(response, "usage_metadata", None)
+        if usage:
+            input_t = usage.get("input_tokens", 0)
+            output_t = usage.get("output_tokens", 0)
+            cost = (
+                input_t * self.config.input_token_price_per_million / 1_000_000
+                + output_t * self.config.output_token_price_per_million / 1_000_000
+            )
+            token_payload.update({"input_tokens": input_t, "output_tokens": output_t, "cost_usd": cost})
+            _set_token_cost_attributes(input_t, output_t, cost)
+        events.append(make_event("evaluator","evaluation", token_payload))
 
         # Parse JSON
         try:
-            cleaned = re.sub(r"```(?:json)?\s*", "", raw).strip().rstrip("```").strip()
+            cleaned = re.sub(r"```(?:json)?\s*|\s*```", "", raw).strip()
             parsed = json.loads(cleaned)
             faithfulness = float(parsed.get("faithfulness", 0.5))
             completeness = float(parsed.get("completeness", 0.5))
@@ -176,7 +147,7 @@ class EvaluatorAgent:
 
         # Emit warning span if below faithfulness_threshold
         if faithfulness < self.config.faithfulness_threshold:
-            events.append(self._event("guard_triggered", {
+            events.append(make_event("evaluator","guard_triggered", {
                 "guard": "low_faithfulness",
                 "faithfulness": faithfulness,
                 "threshold": self.config.faithfulness_threshold,

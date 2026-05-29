@@ -19,6 +19,7 @@ class MultiAgentConfig:
 
     # Observability backend (shared across all agents)
     exporter: Literal["langwatch", "langfuse", "phoenix", "opik", "otel-stdout", "none"] = "langwatch"
+    sampling_rate: float = 1.0
 
     # Evaluation thresholds
     faithfulness_threshold: float = 0.8   # below → warning span

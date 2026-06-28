@@ -1,2 +1,18 @@
 .env
 .venv
+
+# Python bytecode
+src/multi_agent/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Pytest
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+logs

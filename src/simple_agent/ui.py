@@ -1,5 +1,3 @@
-"""Gradio chat UI — calls the SimpleAgent FastAPI backend."""
-
 import httpx
 
 from src.ui import build_demo
@@ -35,4 +33,4 @@ demo = build_demo(
 )
 
 if __name__ == "__main__":
-    demo.launch(server_port=7860)
+    demo.launch()

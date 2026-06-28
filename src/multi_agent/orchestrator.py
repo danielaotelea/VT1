@@ -20,9 +20,9 @@ import logging
 import re
 from typing import Any, Optional
 
-from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
+from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
 
 from .config import MultiAgentConfig
@@ -33,8 +33,6 @@ from .otel_utils import set_token_cost_attributes as _set_token_cost_attributes
 from .prompts import PROMPTS
 from .researcher import ResearcherAgent
 from .state import AgentState, EvaluationResult, ResearchResult, TraceEvent, make_event
-
-load_dotenv()
 
 log = logging.getLogger("multi_agent.orchestrator")
 
@@ -100,11 +98,15 @@ class OrchestratorAgent:
         if model is not None:
             self.model: Any = model
         else:
-            from langchain_openai import ChatOpenAI
             self.model = ChatOpenAI(
                 model=self.config.orchestrator_model,
                 temperature=self.config.temperature,
             )
+
+    @property
+    def tracing_active(self) -> bool:
+        """True when an observability backend is connected and sending spans."""
+        return self._adapter.active
 
     # ------------------------------------------------------------------
     # Graph
@@ -143,7 +145,12 @@ class OrchestratorAgent:
             raise exc
 
         call_event = make_event("orchestrator","tool_call", {"tool": "ResearcherAgent", "query": query})
-        research, r_events = self.researcher.run(query, callback=_callback(config))
+        cb = _callback(config)
+        research, r_events = self.researcher.run(
+            query,
+            callback=cb,
+            runnable_config=config if cb is None else None,
+        )
 
         if _PII_PATTERN.search(research.get("summary", "")):
             exc = PIIExposureError("Credential / PII pattern detected in research output.")
@@ -159,13 +166,15 @@ class OrchestratorAgent:
 
     def _evaluate_node(self, state: AgentState, config: RunnableConfig) -> dict:
         call_event = make_event("orchestrator","tool_call", {"tool": "EvaluatorAgent"})
+        cb = _callback(config)
         evaluation, e_events = self.evaluator.run(
-            state["query"], state["research"], callback=_callback(config)
+            state["query"], state["research"],
+            callback=cb,
+            runnable_config=config if cb is None else None,
         )
 
         faithfulness = evaluation.get("faithfulness", 0.0)
-        log.info("Evaluation — faithfulness=%.2f completeness=%.2f label=%s",
-                 faithfulness, evaluation.get("completeness", 0), evaluation.get("label"))
+        log.info(f"Evaluation — faithfulness={faithfulness:.2f} completeness={evaluation.get('completeness', 0):.2f} label={evaluation.get('label')}")
 
         updates: dict = {"evaluation": evaluation, "trace_events": [call_event] + e_events}
 
@@ -191,17 +200,19 @@ class OrchestratorAgent:
         events: list[TraceEvent] = []
         if hitl_required:
             events.append(make_event("orchestrator","guard_triggered", {"guard": "hitl_escalation"}))
-            log.warning("HITL escalation — faithfulness=%.2f after %d retries", faithfulness, retry_count)
+            log.warning(f"HITL escalation — faithfulness={faithfulness:.2f} after {retry_count} retries")
         else:
             log.info("Quality acceptable — synthesising final answer")
 
+        cb = _callback(config)
         final_answer = self._synthesise(
             query=state["query"],
             research=state["research"],
             evaluation=state["evaluation"],
-            callback=_callback(config),
+            callback=cb,
             session_id=_session_id(config),
             conversation_history=state.get("conversation_history") or [],
+            runnable_config=config if cb is None else None,
         )
         return {
             "final_answer":  final_answer,
@@ -231,6 +242,7 @@ class OrchestratorAgent:
         callback=None,
         session_id: Optional[str] = None,
         conversation_history: Optional[list[BaseMessage]] = None,
+        runnable_config=None,
     ) -> str:
         sources_text = "\n".join(
             f"[{i+1}] {s.get('url', '')} — {s.get('excerpt', '')}"
@@ -249,13 +261,16 @@ class OrchestratorAgent:
             user_msg,
         ]
 
-        invoke_cfg: dict = {}
         if callback is not None:
-            invoke_cfg["callbacks"] = [callback]
+            invoke_config = RunnableConfig(callbacks=[callback])
+        elif runnable_config is not None:
+            invoke_config = runnable_config
+        else:
+            invoke_config = None
 
         response = self.model.invoke(
             messages,
-            **({"config": RunnableConfig(**invoke_cfg)} if invoke_cfg else {}),
+            **({"config": invoke_config} if invoke_config else {}),
         )
         usage = getattr(response, "usage_metadata", None)
         if usage:
@@ -264,7 +279,14 @@ class OrchestratorAgent:
                     + out * self.config.output_token_price_per_million) / 1_000_000
             _set_token_cost_attributes(inp, out, cost)
 
-        return getattr(response, "content", str(response))
+        answer = getattr(response, "content", str(response))
+        sources = [s for s in research.get("sources", []) if s.get("url")]
+        if sources:
+            sources_block = "\n".join(
+                f"[{i+1}] {s['url']}" for i, s in enumerate(sources)
+            )
+            answer = f"{answer}\n\n**Sources:**\n{sources_block}"
+        return answer
 
     # ------------------------------------------------------------------
     # Public API
@@ -281,7 +303,7 @@ class OrchestratorAgent:
         Raises LoopDetectedError or PIIExposureError when a safety guard fires.
         Pass *conversation_history* (or use run_turn) for multi-turn context.
         """
-        log.info("Starting run — query: %r session=%s", query[:120], session_id)
+        log.info(f"Starting run — query: {query[:120]!r} session={session_id}")
 
         initial_state: AgentState = {
             "query":                query,
@@ -299,6 +321,7 @@ class OrchestratorAgent:
             "conversation_history": list(conversation_history or []),
         }
 
+        self._adapter._emit_log("orchestrator", session_id)
         run_config = RunnableConfig(
             configurable={
                 "session_id": session_id or "",

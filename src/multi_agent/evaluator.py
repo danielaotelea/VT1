@@ -26,15 +26,14 @@ import re
 from string import Template
 from typing import Any, Optional
 
-from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.runnables import RunnableConfig
+from langchain_openai import ChatOpenAI
 
 from .config import MultiAgentConfig
 from .otel_utils import set_token_cost_attributes as _set_token_cost_attributes
 from .prompts import PROMPTS
 from .state import EvaluationResult, ResearchResult, TraceEvent, make_event
-
-load_dotenv()
 
 
 class EvaluatorAgent:
@@ -60,7 +59,6 @@ class EvaluatorAgent:
         if model is not None:
             self.model: Any = model
         else:
-            from langchain_openai import ChatOpenAI
             self.model = ChatOpenAI(
                 model=self.config.evaluator_model,
                 temperature=0,
@@ -84,7 +82,7 @@ class EvaluatorAgent:
     # Public API
     # ------------------------------------------------------------------
 
-    def run(self, query: str, research: ResearchResult, callback=None) -> tuple[EvaluationResult, list[TraceEvent]]:
+    def run(self, query: str, research: ResearchResult, callback=None, runnable_config=None) -> tuple[EvaluationResult, list[TraceEvent]]:
         """Score *research* and return an :class:`EvaluationResult` plus trace events.
 
         If the LLM returns malformed JSON, all scores default to 0.5 and
@@ -103,11 +101,13 @@ class EvaluatorAgent:
             HumanMessage(content=prompt),
         ]
 
-        invoke_kwargs: dict = {}
         if callback is not None:
-            from langchain_core.runnables import RunnableConfig
-            invoke_kwargs["config"] = RunnableConfig(callbacks=[callback])
-        response = self.model.invoke(messages, **invoke_kwargs)
+            invoke_config = RunnableConfig(callbacks=[callback])
+        elif runnable_config is not None:
+            invoke_config = runnable_config
+        else:
+            invoke_config = None
+        response = self.model.invoke(messages, **({"config": invoke_config} if invoke_config else {}))
         raw = getattr(response, "content", str(response))
 
         token_payload: dict = {"model": self.config.evaluator_model, "raw_chars": len(raw)}

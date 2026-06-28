@@ -32,6 +32,15 @@ def set_token_cost_attributes(input_tokens: int, output_tokens: int, cost_usd: f
     span.set_attribute("cost.usd", cost_usd)
 
 
+def current_trace_id() -> str:
+    """Return the active OTel trace ID as a 32-char hex string, or 'no-trace'."""
+    from opentelemetry import trace
+    ctx = trace.get_current_span().get_span_context()
+    if ctx.trace_id == 0:
+        return "no-trace"
+    return format(ctx.trace_id, "032x")
+
+
 def otel_resource_attrs(service_name: str) -> dict:
     """Return standard OTel resource attributes for this service."""
     import os

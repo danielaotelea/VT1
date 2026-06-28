@@ -18,19 +18,20 @@ Output schema::
 """
 
 import json
+import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Optional
 
-from dotenv import load_dotenv
+import httpx
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langchain_core.runnables import RunnableConfig
+from langchain_openai import ChatOpenAI
 
 from .config import MultiAgentConfig
 from .otel_utils import set_token_cost_attributes as _set_token_cost_attributes
 from .prompts import PROMPTS
 from .state import ResearchResult, TraceEvent, make_event
-
-load_dotenv()
 
 
 # ---------------------------------------------------------------------------
@@ -43,7 +44,6 @@ def _default_web_search(query: str, max_results: int = 3) -> list[dict]:
     Falls back to Tavily when TAVILY_API_KEY is set in the environment.
     Returns at most *max_results* items, each with 'title', 'url', 'snippet'.
     """
-    import os
     tavily_key = os.getenv("TAVILY_API_KEY")
     if tavily_key:
         try:
@@ -76,7 +76,6 @@ def _default_web_search(query: str, max_results: int = 3) -> list[dict]:
 def _default_fetch_page(url: str, max_chars: int = 1_500) -> str:
     """Fetch a URL and return up to *max_chars* of cleaned plain text."""
     try:
-        import httpx
         headers = {"User-Agent": "Mozilla/5.0 (compatible; ResearchBot/1.0)"}
         resp = httpx.get(url, headers=headers, follow_redirects=True, timeout=10)
         resp.raise_for_status()
@@ -128,7 +127,6 @@ class ResearcherAgent:
         if model is not None:
             self.model: Any = model
         else:
-            from langchain_openai import ChatOpenAI
             self.model = ChatOpenAI(
                 model=self.config.researcher_model,
                 temperature=self.config.temperature,
@@ -163,7 +161,7 @@ class ResearcherAgent:
 
         return enriched, events
 
-    def _summarise(self, query: str, context: list[dict], callback=None) -> tuple[str, list[TraceEvent]]:
+    def _summarise(self, query: str, context: list[dict], callback=None, runnable_config=None) -> tuple[str, list[TraceEvent]]:
         """Call the LLM to produce a cited summary from *context*."""
         events: list[TraceEvent] = []
         context_text = "\n\n".join(
@@ -174,11 +172,13 @@ class ResearcherAgent:
             SystemMessage(content=self.SYSTEM_PROMPT),
             HumanMessage(content=f"Query: {query}\n\nSources:\n{context_text}"),
         ]
-        invoke_kwargs: dict = {}
         if callback is not None:
-            from langchain_core.runnables import RunnableConfig
-            invoke_kwargs["config"] = RunnableConfig(callbacks=[callback])
-        response = self.model.invoke(messages, **invoke_kwargs)
+            invoke_config = RunnableConfig(callbacks=[callback])
+        elif runnable_config is not None:
+            invoke_config = runnable_config
+        else:
+            invoke_config = None
+        response = self.model.invoke(messages, **({"config": invoke_config} if invoke_config else {}))
         raw = getattr(response, "content", str(response))
         usage = getattr(response, "usage_metadata", None)
         token_payload: dict = {"model": self.config.researcher_model, "chars": len(raw)}
@@ -198,7 +198,7 @@ class ResearcherAgent:
     # Public API
     # ------------------------------------------------------------------
 
-    def run(self, query: str, callback=None) -> tuple[ResearchResult, list[TraceEvent]]:
+    def run(self, query: str, callback=None, runnable_config=None) -> tuple[ResearchResult, list[TraceEvent]]:
         """Research *query* and return a :class:`ResearchResult` plus trace events.
 
         The LLM response is expected to be JSON.  If parsing fails the raw
@@ -209,7 +209,7 @@ class ResearcherAgent:
         context, search_events = self._gather_context(query)
         all_events.extend(search_events)
 
-        raw, llm_events = self._summarise(query, context, callback=callback)
+        raw, llm_events = self._summarise(query, context, callback=callback, runnable_config=runnable_config)
         all_events.extend(llm_events)
 
         # Parse JSON response

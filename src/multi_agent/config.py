@@ -1,5 +1,8 @@
-from dataclasses import dataclass
+import os
+from dataclasses import dataclass, field
 from typing import Literal
+
+ExporterName = Literal["langfuse", "phoenix", "opik", "otel-stdout", "none"]
 
 
 @dataclass
@@ -18,7 +21,7 @@ class MultiAgentConfig:
     temperature: float = 0
 
     # Observability backend (shared across all agents)
-    exporter: Literal["langwatch", "langfuse", "phoenix", "opik", "otel-stdout", "none"] = "langwatch"
+    exporter: ExporterName = "none"
     sampling_rate: float = 1.0
 
     # Evaluation thresholds
@@ -36,3 +39,9 @@ class MultiAgentConfig:
     # Pricing (USD per million tokens) — for CostTracker
     input_token_price_per_million: float = 5.0
     output_token_price_per_million: float = 15.0
+
+    # Observability project names — override via env to separate projects per agent
+    phoenix_project_name: str = field(default_factory=lambda: os.getenv("PHOENIX_PROJECT_NAME_MULTI_AGENT", "vt1-multi-agent"))
+    opik_project_name: str = field(default_factory=lambda: os.getenv("OPIK_PROJECT_NAME_MULTI_AGENT", "vt1-multi-agent"))
+    langfuse_public_key: str = field(default_factory=lambda: os.getenv("LANGFUSE_PUBLIC_KEY_MULTI_AGENT", ""))
+    langfuse_secret_key: str = field(default_factory=lambda: os.getenv("LANGFUSE_SECRET_KEY_MULTI_AGENT", ""))

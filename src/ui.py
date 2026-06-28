@@ -44,28 +44,41 @@ def build_demo(
 """
     state: dict = {"exporter": "none", "session_id": ""}
 
-    def activate_exporter(exporter: str) -> str:
+    def _reset_backend_session(old_sid: str) -> None:
+        if old_sid:
+            try:
+                httpx.delete(f"{backend_url}/session/{old_sid}", timeout=5)
+            except Exception:
+                pass
+
+    def activate_exporter(exporter: str) -> tuple:
         state["exporter"] = exporter
+        # New exporter → new session so traces aren't mixed across tools.
+        _reset_backend_session(state["session_id"])
+        sid = _new_session_id()
+        state["session_id"] = sid
         try:
             r = httpx.post(f"{backend_url}/exporter/{exporter}", timeout=10)
             r.raise_for_status()
             data = r.json()
             status = "active" if data["active"] else "failed to initialise"
-            return f"Exporter: {data['exporter']} — {status} ({data['collector_url']})"
+            msg = f"Exporter: {data['exporter']} — {status} ({data['collector_url']})"
         except Exception as e:
-            return f"Could not activate exporter: {e}"
+            msg = f"Could not activate exporter: {e}"
+        return msg, sid, []
 
     def set_session(session_id: str) -> str:
         state["session_id"] = session_id
         return session_id
 
-    def new_session() -> str:
+    def new_session() -> tuple:
+        _reset_backend_session(state["session_id"])
         sid = _new_session_id()
         state["session_id"] = sid
-        return sid
+        return sid, []
 
     def _chat(message: str, history: list) -> str:
-        exporter  = state["exporter"]
+        exporter   = state["exporter"]
         session_id = state["session_id"] or _new_session_id()
         return chat_fn(message, history, exporter, session_id)
 
@@ -86,8 +99,6 @@ def build_demo(
                 scale=3,
             )
 
-        exporter_dd.change(fn=activate_exporter, inputs=exporter_dd, outputs=exporter_status)
-
         with gr.Row():
             session_box = gr.Textbox(
                 label="Session ID",
@@ -98,9 +109,20 @@ def build_demo(
             new_session_btn = gr.Button("New Session", scale=1)
 
         session_box.change(fn=set_session, inputs=session_box, outputs=session_box)
-        new_session_btn.click(fn=new_session, outputs=session_box)
 
         chat_interface = gr.ChatInterface(fn=_chat)
+
+        # Wire exporter change and new-session button after chat_interface is created
+        # so we can clear chat_interface.chatbot as part of the same event.
+        exporter_dd.change(
+            fn=activate_exporter,
+            inputs=exporter_dd,
+            outputs=[exporter_status, session_box, chat_interface.chatbot],
+        )
+        new_session_btn.click(
+            fn=new_session,
+            outputs=[session_box, chat_interface.chatbot],
+        )
 
         gr.Markdown("### Example questions")
         example_table = gr.Dataset(

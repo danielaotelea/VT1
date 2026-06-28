@@ -37,6 +37,7 @@ class EvaluationResult(TypedDict):
     guardrail_compliance: float
     label: str          # "grounded" | "hallucinated"
     raw_response: str
+    reason: str         # one-sentence explanation from the LLM judge
 
 
 def make_event(agent: str, event_type: str, payload: dict) -> TraceEvent:

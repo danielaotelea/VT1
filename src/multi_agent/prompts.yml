@@ -20,17 +20,12 @@ evaluator:
     Respond with JSON only — no markdown, no explanation — using this schema:
     {
       "faithfulness": <float 0-1>,
-      "completeness": <float 0-1>,
-      "guardrail_compliance": <float 0-1>,
       "label": "grounded" | "hallucinated",
       "reasoning": "<one sentence>"
     }
 
     Criteria:
     - faithfulness: every claim in the summary must be traceable to a source excerpt.
-    - completeness: all sub-questions implied by the user query must be addressed.
-    - guardrail_compliance: the output must not contain API keys, passwords, PII,
-      or any disallowed content.
 
     User query: $query
 

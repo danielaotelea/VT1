@@ -1,16 +1,12 @@
 """EvaluatorAgent — LLM-as-judge that scores ResearcherAgent output.
 
 Scoring dimensions (GPT-4o-mini, temperature=0 for reproducibility):
-  faithfulness        (0–1)  Is every claim grounded in a cited source excerpt?
-  completeness        (0–1)  Does the answer address all parts of the user query?
-  guardrail_compliance (0–1) No PII, credentials, or disallowed content in output.
+  faithfulness (0–1)  Is every claim grounded in a cited source excerpt?
 
 Output schema::
 
     {
         "faithfulness": float,
-        "completeness": float,
-        "guardrail_compliance": float,
         "label": "grounded" | "hallucinated",
         "raw_response": str
     }
@@ -128,21 +124,15 @@ class EvaluatorAgent:
             cleaned = re.sub(r"```(?:json)?\s*|\s*```", "", raw).strip()
             parsed = json.loads(cleaned)
             faithfulness = float(parsed.get("faithfulness", 0.5))
-            completeness = float(parsed.get("completeness", 0.5))
-            guardrail_compliance = float(parsed.get("guardrail_compliance", 0.5))
 
             # Clamp to [0, 1]
             faithfulness = max(0.0, min(1.0, faithfulness))
-            completeness = max(0.0, min(1.0, completeness))
-            guardrail_compliance = max(0.0, min(1.0, guardrail_compliance))
 
             label = parsed.get("label")
             if label not in ("grounded", "hallucinated"):
                 label = "grounded" if faithfulness >= 0.6 else "hallucinated"
         except (json.JSONDecodeError, ValueError, TypeError):
             faithfulness = 0.5
-            completeness = 0.5
-            guardrail_compliance = 0.5
             label = "hallucinated"
 
         # Emit warning span if below faithfulness_threshold
@@ -155,10 +145,9 @@ class EvaluatorAgent:
 
         result: EvaluationResult = {
             "faithfulness": faithfulness,
-            "completeness": completeness,
-            "guardrail_compliance": guardrail_compliance,
             "label": label,
             "raw_response": raw,
+            "reason": "",
         }
 
         return result, events

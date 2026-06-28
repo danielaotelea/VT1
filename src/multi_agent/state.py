@@ -33,8 +33,6 @@ class ResearchResult(TypedDict):
 class EvaluationResult(TypedDict):
     """Scores produced by EvaluatorAgent."""
     faithfulness: float
-    completeness: float
-    guardrail_compliance: float
     label: str          # "grounded" | "hallucinated"
     raw_response: str
     reason: str         # one-sentence explanation from the LLM judge

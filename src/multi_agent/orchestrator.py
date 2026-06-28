@@ -50,14 +50,7 @@ class PIIExposureError(RuntimeError):
 
 
 # ---------------------------------------------------------------------------
-# Config helpers — read per-run values stored in LangGraph configurable.
-# The top-level 'callbacks' key is replaced by a CallbackManager object before
-# nodes receive config, so we stash the raw handler under configurable instead.
 # ---------------------------------------------------------------------------
-
-def _callback(config: Optional[RunnableConfig]):
-    return (config or {}).get("configurable", {}).get("_callback")
-
 
 def _session_id(config: Optional[RunnableConfig]) -> Optional[str]:
     return (config or {}).get("configurable", {}).get("session_id") or None
@@ -145,7 +138,7 @@ class OrchestratorAgent:
             raise exc
 
         call_event = make_event("orchestrator","tool_call", {"tool": "ResearcherAgent", "query": query})
-        cb = _callback(config)
+        cb = self._adapter.callback(_session_id(config))
         research, r_events = self.researcher.run(
             query,
             callback=cb,
@@ -166,7 +159,7 @@ class OrchestratorAgent:
 
     def _evaluate_node(self, state: AgentState, config: RunnableConfig) -> dict:
         call_event = make_event("orchestrator","tool_call", {"tool": "EvaluatorAgent"})
-        cb = _callback(config)
+        cb = self._adapter.callback(_session_id(config))
         evaluation, e_events = self.evaluator.run(
             state["query"], state["research"],
             callback=cb,
@@ -174,7 +167,7 @@ class OrchestratorAgent:
         )
 
         faithfulness = evaluation.get("faithfulness", 0.0)
-        log.info(f"Evaluation — faithfulness={faithfulness:.2f} completeness={evaluation.get('completeness', 0):.2f} label={evaluation.get('label')}")
+        log.info(f"Evaluation — faithfulness={faithfulness:.2f} label={evaluation.get('label')}")
 
         updates: dict = {"evaluation": evaluation, "trace_events": [call_event] + e_events}
 
@@ -204,7 +197,7 @@ class OrchestratorAgent:
         else:
             log.info("Quality acceptable — synthesising final answer")
 
-        cb = _callback(config)
+        cb = self._adapter.callback(_session_id(config))
         final_answer = self._synthesise(
             query=state["query"],
             research=state["research"],
@@ -252,8 +245,7 @@ class OrchestratorAgent:
             f"User query: {query}\n\n"
             f"Research summary: {research.get('summary', '')}\n\n"
             f"Sources:\n{sources_text}\n\n"
-            f"Evaluation — faithfulness: {evaluation.get('faithfulness'):.2f}, "
-            f"completeness: {evaluation.get('completeness'):.2f}"
+            f"Faithfulness score: {evaluation.get('faithfulness', 0.0):.2f}"
         ))
         messages: list[BaseMessage] = [
             SystemMessage(content=PROMPTS.orchestrator_synthesis),
@@ -311,8 +303,7 @@ class OrchestratorAgent:
             "trace_events":         [],
             "research":             {"summary": "", "sources": []},
             "evaluation":           {
-                "faithfulness": 0.0, "completeness": 0.0,
-                "guardrail_compliance": 0.0, "label": "hallucinated", "raw_response": "",
+                "faithfulness": 0.0, "label": "hallucinated", "raw_response": "", "reason": "",
             },
             "retry_count":          0,
             "hitl_required":        False,
@@ -325,7 +316,6 @@ class OrchestratorAgent:
         run_config = RunnableConfig(
             configurable={
                 "session_id": session_id or "",
-                "_callback":  self._adapter.callback(session_id),
             },
         )
         with self._adapter.session_ctx(session_id):

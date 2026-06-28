@@ -80,10 +80,6 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     final_answer: str
     faithfulness: float
-    completeness: float
-    guardrail_compliance: float
-    label: str
-    retry_count: int
     hitl_required: bool
 
 
@@ -133,9 +129,5 @@ def chat(request: ChatRequest) -> ChatResponse:
     return ChatResponse(
         final_answer=state["final_answer"],
         faithfulness=evaluation.get("faithfulness", 0.0),
-        completeness=evaluation.get("completeness", 0.0),
-        guardrail_compliance=evaluation.get("guardrail_compliance", 0.0),
-        label=evaluation.get("label", "unknown"),
-        retry_count=state["retry_count"],
         hitl_required=state["hitl_required"],
     )

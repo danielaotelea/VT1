@@ -1,0 +1,60 @@
+{
+  "id": "session-20260628-165917",
+  "createdAt": "2026-06-28T14:59:27.093Z",
+  "updatedAt": "2026-06-28T14:59:27.093Z",
+  "projectId": "cmor6poyz0001o607olk1vvb3",
+  "bookmarked": false,
+  "public": false,
+  "environment": "default",
+  "traces": [
+    {
+      "id": "d3de2fcefe23f198060e0c1aaf2464cf",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T14:59:21.541Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "46e743a8a75f623f0451d637a51dd82f",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T14:59:23.237Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "4750d539f20913304c23895030d61d83",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T14:59:41.198Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "f5369f1ed0e005bd729d40023583f19c",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T14:59:42.069Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "ec6ca2d0f20b4363153f528b6097f79c",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T14:59:42.990Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    }
+  ],
+  "totalCost": 0.004559999999,
+  "users": [],
+  "scores": [],
+  "comments": []
+}

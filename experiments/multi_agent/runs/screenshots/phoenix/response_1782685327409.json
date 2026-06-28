@@ -1,0 +1,41 @@
+{
+  "data": {
+    "id": "UHJvamVjdFNlc3Npb246Mzg=",
+    "session_id": "round2-phoenix-001",
+    "project_id": "UHJvamVjdDoz",
+    "start_time": "2026-06-28T21:44:29.547608+00:00",
+    "end_time": "2026-06-28T21:45:18.930709+00:00",
+    "traces": [
+      {
+        "id": "VHJhY2U6NTc4",
+        "trace_id": "1414bf321c3eadbd145dbb3f03484abe",
+        "start_time": "2026-06-28T21:44:29.547608+00:00",
+        "end_time": "2026-06-28T21:44:34.851632+00:00"
+      },
+      {
+        "id": "VHJhY2U6NTc5",
+        "trace_id": "7a4aa1dca40bfa7b10a81372c1e05390",
+        "start_time": "2026-06-28T21:44:34.855188+00:00",
+        "end_time": "2026-06-28T21:44:42.174965+00:00"
+      },
+      {
+        "id": "VHJhY2U6NTgw",
+        "trace_id": "be05ac2dec441b285ff5c5d23688260f",
+        "start_time": "2026-06-28T21:44:42.179175+00:00",
+        "end_time": "2026-06-28T21:44:59.407547+00:00"
+      },
+      {
+        "id": "VHJhY2U6NTgx",
+        "trace_id": "c22af92bfb4f70787a512bbf6ed540e9",
+        "start_time": "2026-06-28T21:44:59.411305+00:00",
+        "end_time": "2026-06-28T21:45:06.483751+00:00"
+      },
+      {
+        "id": "VHJhY2U6NTgy",
+        "trace_id": "bf67d075f95cacbe95819ce69f4ba38a",
+        "start_time": "2026-06-28T21:45:06.488358+00:00",
+        "end_time": "2026-06-28T21:45:18.930709+00:00"
+      }
+    ]
+  }
+}

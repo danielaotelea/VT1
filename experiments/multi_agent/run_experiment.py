@@ -44,9 +44,9 @@ from src.multi_agent.orchestrator import OrchestratorAgent
 #   Type A — Focused factual: narrow, well-defined answer expected.
 #             Tests single-pass Researcher → Evaluator with high faithfulness.
 #   Type B — Comparative: requires synthesising multiple sources.
-#             Tests completeness scoring and multi-source citation.
+#             Tests multi-source citation and faithfulness scoring.
 #   Type C — Multi-part: several sub-questions in one prompt.
-#             Tests completeness scoring and potential retry behaviour.
+#             Tests potential retry behaviour and HITL escalation.
 # ---------------------------------------------------------------------------
 
 QUERIES = [
@@ -162,8 +162,6 @@ def run_experiment(exporter: str, session_id: str) -> dict:
             guards = _extract_guards(trace_events)
 
             faithfulness = evaluation.get("faithfulness", 0.0)
-            completeness = evaluation.get("completeness", 0.0)
-            guardrail = evaluation.get("guardrail_compliance", 0.0)
             label = evaluation.get("label", "unknown")
             retry_count = state.get("retry_count", 0)
             hitl = state.get("hitl_required", False)
@@ -174,7 +172,7 @@ def run_experiment(exporter: str, session_id: str) -> dict:
             tokens = {"input": 0, "output": 0}
             cost = 0.0
             guards = []
-            faithfulness = completeness = guardrail = 0.0
+            faithfulness = 0.0
             label = "error"
             retry_count = 0
             hitl = False
@@ -186,8 +184,7 @@ def run_experiment(exporter: str, session_id: str) -> dict:
         guards_str = f" guards={guards}" if guards else ""
         print(
             f"        {status}  {latency_ms:.0f} ms  "
-            f"faith={faithfulness:.2f} compl={completeness:.2f}  "
-            f"retries={retry_count}  src={source_count}"
+            f"faith={faithfulness:.2f}  retries={retry_count}  src={source_count}"
             f"{hitl_flag}{guards_str}"
         )
         print()
@@ -198,8 +195,6 @@ def run_experiment(exporter: str, session_id: str) -> dict:
             "prompt": q["prompt"],
             "latency_ms": latency_ms,
             "faithfulness": round(faithfulness, 4),
-            "completeness": round(completeness, 4),
-            "guardrail_compliance": round(guardrail, 4),
             "label": label,
             "retry_count": retry_count,
             "hitl_required": hitl,
@@ -219,9 +214,6 @@ def run_experiment(exporter: str, session_id: str) -> dict:
         "cost_usd": round(sum(r["cost_usd"] for r in query_results), 8),
         "avg_faithfulness": round(
             sum(r["faithfulness"] for r in query_results) / len(query_results), 4
-        ),
-        "avg_completeness": round(
-            sum(r["completeness"] for r in query_results) / len(query_results), 4
         ),
         "total_retries": sum(r["retry_count"] for r in query_results),
         "hitl_escalations": sum(1 for r in query_results if r["hitl_required"]),
@@ -253,28 +245,26 @@ def print_summary(data: dict) -> None:
     print("  SUMMARY")
     print(f"{'=' * 72}")
     print(
-        f"  {'ID':<4}  {'Latency':>10}  {'Faith':>6}  {'Compl':>6}  "
+        f"  {'ID':<4}  {'Latency':>10}  {'Faith':>6}  "
         f"{'Retry':>5}  {'HITL':>5}  {'Cost':>10}  Status"
     )
-    print(f"  {'-'*4}  {'-'*10}  {'-'*6}  {'-'*6}  {'-'*5}  {'-'*5}  {'-'*10}  ------")
+    print(f"  {'-'*4}  {'-'*10}  {'-'*6}  {'-'*5}  {'-'*5}  {'-'*10}  ------")
     for r in data["queries"]:
         status = "OK" if not r["error"] else "ERROR"
         hitl = "yes" if r["hitl_required"] else "no"
         print(
             f"  {r['id']:<4}  {r['latency_ms']:>9.0f}ms"
             f"  {r['faithfulness']:>6.2f}"
-            f"  {r['completeness']:>6.2f}"
             f"  {r['retry_count']:>5}"
             f"  {hitl:>5}"
             f"  ${r['cost_usd']:>9.6f}"
             f"  {status}"
         )
     t = data["totals"]
-    print(f"  {'─'*4}  {'─'*10}  {'─'*6}  {'─'*6}  {'─'*5}  {'─'*5}  {'─'*10}")
+    print(f"  {'─'*4}  {'─'*10}  {'─'*6}  {'─'*5}  {'─'*5}  {'─'*10}")
     print(
         f"  {'TOT':<4}  {t['latency_ms']:>9.0f}ms"
         f"  {t['avg_faithfulness']:>6.2f}"
-        f"  {t['avg_completeness']:>6.2f}"
         f"  {t['total_retries']:>5}"
         f"  {t['hitl_escalations']:>5}"
         f"  ${t['cost_usd']:>9.6f}"

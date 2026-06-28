@@ -1,0 +1,12 @@
+original_usage.total_tokens: 640
+completion_tokens: 206
+prompt_tokens: 434
+original_usage.prompt_tokens: 434
+original_usage.completion_tokens_details.accepted_prediction_tokens: 0
+original_usage.prompt_tokens_details.cached_tokens: 0
+total_tokens: 640
+original_usage.completion_tokens_details.reasoning_tokens: 0
+original_usage.completion_tokens_details.audio_tokens: 0
+original_usage.completion_tokens: 206
+original_usage.prompt_tokens_details.audio_tokens: 0
+original_usage.completion_tokens_details.rejected_prediction_tokens: 0

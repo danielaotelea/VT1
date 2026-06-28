@@ -1,0 +1,186 @@
+{
+  "id": "a2a-langfuse-001",
+  "createdAt": "2026-06-28T22:30:16.343Z",
+  "updatedAt": "2026-06-28T22:30:16.343Z",
+  "projectId": "cmqwenvyc000on6079m7gmi89",
+  "bookmarked": false,
+  "public": false,
+  "environment": "default",
+  "traces": [
+    {
+      "id": "ee506137a12d203e07ca2f291ded556a",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T22:30:13.951Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "f55376b25bf9b20ed3c7d61cb8588b02",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:13.953Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "85901c323856ba6779d9fa31d32b3d54",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:17.751Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "53e77c616245312ee3ed2667d3aa16dd",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T22:30:20.063Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "26d36026673270d48e8d96a2ab8f0529",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:20.066Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "fad0f67d48bcbaec1be1071270c1575b",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:23.746Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "2825633c6cc6552bf34467fcbb517035",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:26.653Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "ee2597e18725a1813de86cacfc0efbf5",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T22:30:27.125Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "a5aa7f1ebdd2715555817616b101bf30",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:30.237Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "fe257fba9f2d005f90b1b80924a030ba",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:31.356Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "16dcdba0dc32ecb2b20a0c129a9495b5",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:34.574Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "83eadc903f4feb288eea7c55cbc8e429",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:35.696Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "b290a4cba6219fe9a33455571be71786",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:38.935Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "36ae33dc791052f6030440899386306b",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:41.414Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "26508580c90430a56ab573d26936c2db",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T22:30:42.166Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "07abb524cc1878a84751bf93873b3d26",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:44.969Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "4c47b2dd858f752acc6a8d040f5edc48",
+      "userId": null,
+      "name": "ChatOpenAI",
+      "timestamp": "2026-06-28T22:30:48.073Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "6e0fd032d8e155e62dd097e6d456ade5",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:48.074Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    },
+    {
+      "id": "1fe2d7af4504c62e262d2dfebcd6a170",
+      "userId": null,
+      "name": "a2a.server.routes.jsonrpc_dispatcher.JsonRpcDispatcher.handle_requests",
+      "timestamp": "2026-06-28T22:30:53.882Z",
+      "environment": "default",
+      "scores": [],
+      "comments": []
+    }
+  ],
+  "totalCost": 0.051839799997,
+  "users": [],
+  "scores": [],
+  "comments": []
+}

@@ -89,7 +89,16 @@ class OtelStdoutTracingStrategy(TracingStrategy):
         tracer = otel_trace.get_tracer("multi_agent_a2a.orchestrator")
 
         async def _wrapped(*args, **kwargs):
-            with tracer.start_as_current_span("orchestrator_run", kind=SpanKind.SERVER):
-                return await fn(*args, **kwargs)
+            with tracer.start_as_current_span(
+                "orchestrator_run", kind=SpanKind.SERVER
+            ) as span:
+                span.set_attribute("openinference.span.kind", "AGENT")
+                result = await fn(*args, **kwargs)
+                if isinstance(result, dict):
+                    span.set_attribute("input.value",     result.get("query", ""))
+                    span.set_attribute("output.value",    result.get("final_answer", ""))
+                    span.set_attribute("input.mime_type",  "text/plain")
+                    span.set_attribute("output.mime_type", "text/plain")
+                return result
 
         return _wrapped

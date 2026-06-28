@@ -96,10 +96,9 @@ class FaithfulnessEvaluator:
             }))
             return EvaluationResult(
                 faithfulness=0.0,
-                completeness=0.0,
-                guardrail_compliance=1.0,
                 label="hallucinated",
                 raw_response="no_source_excerpts",
+                reason="no_source_excerpts",
             ), events
 
         context_block = "\n\n".join(
@@ -154,8 +153,7 @@ class FaithfulnessEvaluator:
 
         return EvaluationResult(
             faithfulness=faithfulness,
-            completeness=0.0,         # not evaluated
-            guardrail_compliance=1.0,  # enforced by orchestrator PII regex
             label=label,
             raw_response=raw,
+            reason=reason,
         ), events

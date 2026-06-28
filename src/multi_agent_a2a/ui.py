@@ -102,12 +102,7 @@ def chat(message: str, session_id: str) -> str:
         "\n\n⚠️ **HITL escalation required** — confidence too low after retries."
         if data["hitl_required"] else ""
     )
-    scores = (
-        f"\n\n---\n"
-        f"**Evaluation** | faithfulness: `{data['faithfulness']:.2f}` | "
-        f"label: `{data['label']}` | "
-        f"retries: `{data['retry_count']}`"
-    )
+    scores = f"\n\n---\n**Faithfulness:** `{data['faithfulness']:.2f}`"
     return data["final_answer"] + scores + hitl_warning
 
 

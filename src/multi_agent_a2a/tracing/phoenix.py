@@ -139,8 +139,10 @@ class PhoenixTracingStrategy(TracingStrategy):
                     # Phoenix session view reads input.value / output.value from the
                     # root span of each trace to populate the HUMAN / AI turn display.
                     if isinstance(result, dict):
-                        span.set_attribute("input.value",  result.get("query", ""))
-                        span.set_attribute("output.value", result.get("final_answer", ""))
+                        span.set_attribute("input.value",     result.get("query", ""))
+                        span.set_attribute("output.value",    result.get("final_answer", ""))
+                        span.set_attribute("input.mime_type",  "text/plain")
+                        span.set_attribute("output.mime_type", "text/plain")
                     return result
 
         return _wrapped

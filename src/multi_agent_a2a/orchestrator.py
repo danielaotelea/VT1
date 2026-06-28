@@ -206,8 +206,7 @@ class OrchestratorAgentA2A:
 
             research: ResearchResult = {"summary": "", "sources": []}
             evaluation: EvaluationResult = {
-                "faithfulness": 0.0, "completeness": 0.0,
-                "guardrail_compliance": 1.0, "label": "hallucinated", "raw_response": "",
+                "faithfulness": 0.0, "label": "hallucinated", "raw_response": "", "reason": "",
             }
 
             # ── Research → Evaluate loop ──────────────────────────────

@@ -82,7 +82,7 @@ class EvaluatorExecutor(AgentExecutor):
                 output={
                     "faithfulness": result.get("faithfulness", 0.0),
                     "label": result.get("label", ""),
-                    "reason": result.get("raw_response", ""),
+                    "reason": result.get("reason", ""),
                 },
             )
 

@@ -30,12 +30,10 @@ _GOOD_RESEARCH: ResearchResult = {
     "sources": [{"url": "https://example.com", "excerpt": "relevant excerpt"}],
 }
 _HIGH_EVAL: EvaluationResult = {
-    "faithfulness": 0.95, "completeness": 0.9,
-    "guardrail_compliance": 1.0, "label": "grounded", "raw_response": "",
+    "faithfulness": 0.95, "label": "grounded", "raw_response": "", "reason": "",
 }
 _LOW_EVAL: EvaluationResult = {
-    "faithfulness": 0.3, "completeness": 0.5,
-    "guardrail_compliance": 1.0, "label": "hallucinated", "raw_response": "",
+    "faithfulness": 0.3, "label": "hallucinated", "raw_response": "", "reason": "",
 }
 
 
@@ -122,8 +120,7 @@ async def test_orchestrator_a2a_retries_on_low_confidence():
         score = 0.9 if call_counts["n"] > 1 else 0.3
         label = "grounded" if score > 0.6 else "hallucinated"
         eval_result: EvaluationResult = {
-            "faithfulness": score, "completeness": 0.8,
-            "guardrail_compliance": 1.0, "label": label, "raw_response": "",
+            "faithfulness": score, "label": label, "raw_response": "", "reason": "",
         }
         return eval_result, [_eval_event(score)]
 

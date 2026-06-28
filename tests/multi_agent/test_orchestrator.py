@@ -68,18 +68,16 @@ _GOOD_RESEARCH: ResearchResult = {
 
 _HIGH_EVAL: EvaluationResult = {
     "faithfulness": 0.95,
-    "completeness": 0.9,
-    "guardrail_compliance": 1.0,
     "label": "grounded",
     "raw_response": '{"faithfulness": 0.95}',
+    "reason": "",
 }
 
 _LOW_EVAL: EvaluationResult = {
     "faithfulness": 0.3,
-    "completeness": 0.5,
-    "guardrail_compliance": 1.0,
     "label": "hallucinated",
     "raw_response": '{"faithfulness": 0.3}',
+    "reason": "",
 }
 
 
@@ -161,8 +159,7 @@ def test_orchestrator_retries_on_low_confidence():
             score = 0.9 if self._calls > 1 else 0.3
             label = "grounded" if score > 0.6 else "hallucinated"
             result: EvaluationResult = {
-                "faithfulness": score, "completeness": 0.8,
-                "guardrail_compliance": 1.0, "label": label, "raw_response": "",
+                "faithfulness": score, "label": label, "raw_response": "", "reason": "",
             }
             return result, [TraceEvent(
                 timestamp=datetime.now(timezone.utc).isoformat(),

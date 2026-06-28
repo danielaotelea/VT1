@@ -20,10 +20,9 @@ _RESEARCH: ResearchResult = {
 
 _HIGH_SCORE: EvaluationResult = {
     "faithfulness": 0.9,
-    "completeness": 0.0,
-    "guardrail_compliance": 1.0,
     "label": "grounded",
     "raw_response": "ragas_faithfulness=0.9000",
+    "reason": "",
 }
 
 
@@ -67,10 +66,9 @@ async def test_evaluator_executor_returns_completed_task():
 async def test_evaluator_executor_artifact_contains_faithfulness():
     result: EvaluationResult = {
         "faithfulness": 0.85,
-        "completeness": 0.0,
-        "guardrail_compliance": 1.0,
         "label": "grounded",
         "raw_response": "ragas_faithfulness=0.8500",
+        "reason": "",
     }
     executor = EvaluatorExecutor(_FakeEvaluator(result))
     queue = _CollectingQueue()

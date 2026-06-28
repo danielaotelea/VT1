@@ -42,9 +42,9 @@ class _FakeFaithfulnessEvaluator:
     def run(self, query: str, research: ResearchResult, callback=None):
         from src.multi_agent.state import make_event
         result: EvaluationResult = {
-            "faithfulness": 0.9, "completeness": 0.0,
-            "guardrail_compliance": 1.0, "label": "grounded",
+            "faithfulness": 0.9, "label": "grounded",
             "raw_response": '{"faithfulness": 0.9, "label": "grounded", "reason": "All claims supported."}',
+            "reason": "All claims supported.",
         }
         events = [make_event("evaluator", "evaluation", {"faithfulness": 0.9})]
         return result, events

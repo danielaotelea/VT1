@@ -23,7 +23,7 @@ class _FakeResearcher:
     def __init__(self, result: ResearchResult):
         self._result = result
 
-    def run(self, query: str, callback=None):  # type: ignore[override]
+    def run(self, query: str, callback=None, runnable_config=None):  # type: ignore[override]
         from datetime import datetime, timezone
         from src.multi_agent.state import TraceEvent
         event = TraceEvent(
@@ -41,7 +41,7 @@ class _FakeEvaluator:
     def __init__(self, result: EvaluationResult):
         self._result = result
 
-    def run(self, query: str, research: ResearchResult, callback=None):  # type: ignore[override]
+    def run(self, query: str, research: ResearchResult, callback=None, runnable_config=None):  # type: ignore[override]
         from datetime import datetime, timezone
         from src.multi_agent.state import TraceEvent
         event = TraceEvent(
@@ -57,7 +57,7 @@ class _FakeLLM:
     def __init__(self, answer: str = "Final synthesised answer."):
         self._answer = answer
 
-    def invoke(self, messages: Any) -> AIMessage:
+    def invoke(self, messages: Any, **kwargs) -> AIMessage:
         return AIMessage(content=self._answer)
 
 
@@ -96,7 +96,8 @@ def test_orchestrator_returns_final_answer():
     )
     state = agent.run("What is X?")
 
-    assert state["final_answer"] == "The answer is X."
+    assert state["final_answer"].startswith("The answer is X.")
+    assert "[1] https://example.com" in state["final_answer"]
     assert state["hitl_required"] is False
 
 
@@ -139,7 +140,7 @@ def test_orchestrator_retries_on_low_confidence():
     _GOOD_RESEARCH_2: ResearchResult = {**_GOOD_RESEARCH, "summary": "Retry summary."}
 
     class _CountingResearcher:
-        def run(self, query: str, callback=None):
+        def run(self, query: str, callback=None, runnable_config=None):
             call_counts["n"] += 1
             from datetime import datetime, timezone
             from src.multi_agent.state import TraceEvent
@@ -153,7 +154,7 @@ def test_orchestrator_retries_on_low_confidence():
         def __init__(self):
             self._calls = 0
 
-        def run(self, query: str, research: ResearchResult, callback=None):
+        def run(self, query: str, research: ResearchResult, callback=None, runnable_config=None):
             self._calls += 1
             from datetime import datetime, timezone
             from src.multi_agent.state import TraceEvent

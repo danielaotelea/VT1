@@ -9,17 +9,10 @@ from typing import Any, cast
 import pytest
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 
-from src.simple_agent.agent import (
-    CostTracker,
-    LoopDetectedError,
-    SimpleAgent,
-    add,
-    build_agent,
-    divide,
-    main,
-    multiply,
-)
+from src.simple_agent.agent import LoopDetectedError, SimpleAgent, build_agent, main
 from src.simple_agent.config import AgentConfig
+from src.simple_agent.cost import CostTracker
+from src.simple_agent.tools import add, divide, multiply
 
 # ---------------------------------------------------------------------------
 # Helpers

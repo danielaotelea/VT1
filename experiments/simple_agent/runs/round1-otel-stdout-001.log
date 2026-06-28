@@ -1,0 +1,1149 @@
+/Users/danielaotelea/Documents/ZHAW/Semester3/VT1/VT1/.venv/lib/python3.11/site-packages/langgraph/cache/base/__init__.py:8: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+  from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+/Users/danielaotelea/Documents/ZHAW/Semester3/VT1/VT1/.venv/lib/python3.11/site-packages/phoenix/server/api/routers/oauth2.py:12: AuthlibDeprecationWarning: authlib.jose module is deprecated, please use joserfc instead.
+It will be compatible before version 2.0.0.
+  from authlib.jose import jwt
+
+==============================================================
+  Exporter  : otel-stdout
+  Session   : round1-otel-stdout-001
+  Model     : gpt-4o
+  Sampling  : 1.0
+  Queries   : 5
+==============================================================
+
+  [Q1] Single tool call
+        → What is 6 multiplied by 7?
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0x49a8e627fe0ef6af5749a805f46fac77",
+        "span_id": "0xe3f6c531c929bec6",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:10.685785Z",
+    "end_time": "2026-06-28T16:02:11.454499Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"What is 6 multiplied by 7?\", \"type\": \"human\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"\", \"generation_info\": {\"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 173, \"total_tokens\": 190, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFO0QRAnZjjoSZ3WBMRVoibWY2O\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-867d-7f92-aced-3d3d6ba2aca8-0\", \"tool_calls\": [{\"name\": \"multiply\", \"args\": {\"a\": 6, \"b\": 7}, \"id\": \"call_EquLibw4mqJPM1tj0pJzzcbe\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 173, \"output_tokens\": 17, \"total_tokens\": 190, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 173, \"total_tokens\": 190, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFO0QRAnZjjoSZ3WBMRVoibWY2O\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "What is 6 multiplied by 7?",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_EquLibw4mqJPM1tj0pJzzcbe",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "multiply",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 6, \"b\": 7}",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 173,
+        "llm.token_count.completion": 17,
+        "llm.token_count.total": 190,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "multiply",
+    "context": {
+        "trace_id": "0xda41da79d874f4ed2ab05131f1d7b78e",
+        "span_id": "0x47a001225a90840e",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:11.455748Z",
+    "end_time": "2026-06-28T16:02:11.456249Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 6, \"b\": 7}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"42\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"multiply\", \"id\": null, \"tool_call_id\": \"call_EquLibw4mqJPM1tj0pJzzcbe\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "multiply",
+        "tool.description": "Multiplies `a` and `b`.\n\n    Args:\n        a: First integer.\n        b: Second integer.",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0x5e91103b6a96d321f2fd3b3d50a8a285",
+        "span_id": "0xdf34d79b27518c60",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:11.456816Z",
+    "end_time": "2026-06-28T16:02:12.165581Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"What is 6 multiplied by 7?\", \"type\": \"human\", \"id\": \"266dead1-1b08-412a-a842-bb577119e331\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 173, \"total_tokens\": 190, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFO0QRAnZjjoSZ3WBMRVoibWY2O\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-867d-7f92-aced-3d3d6ba2aca8-0\", \"tool_calls\": [{\"name\": \"multiply\", \"args\": {\"a\": 6, \"b\": 7}, \"id\": \"call_EquLibw4mqJPM1tj0pJzzcbe\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 173, \"output_tokens\": 17, \"total_tokens\": 190, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"42\", \"type\": \"tool\", \"name\": \"multiply\", \"id\": \"30e5fa0c-1b71-437e-af6e-245bb2d9aedf\", \"tool_call_id\": \"call_EquLibw4mqJPM1tj0pJzzcbe\", \"status\": \"success\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"6 multiplied by 7 is 42.\", \"generation_info\": {\"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"6 multiplied by 7 is 42.\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 10, \"prompt_tokens\": 198, \"total_tokens\": 208, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFPitnNpOkVq2Bl1G0HobIKKQ3w\", \"service_tier\": \"default\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-8980-7971-8f06-b6d327011216-0\", \"usage_metadata\": {\"input_tokens\": 198, \"output_tokens\": 10, \"total_tokens\": 208, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"tool_calls\": [], \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 10, \"prompt_tokens\": 198, \"total_tokens\": 208, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFPitnNpOkVq2Bl1G0HobIKKQ3w\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "What is 6 multiplied by 7?",
+        "llm.input_messages.2.message.role": "assistant",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.id": "call_EquLibw4mqJPM1tj0pJzzcbe",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.name": "multiply",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 6, \"b\": 7}",
+        "llm.input_messages.3.message.role": "tool",
+        "llm.input_messages.3.message.content": "42",
+        "llm.input_messages.3.message.tool_call_id": "call_EquLibw4mqJPM1tj0pJzzcbe",
+        "llm.input_messages.3.message.name": "multiply",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.content": "6 multiplied by 7 is 42.",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 198,
+        "llm.token_count.completion": 10,
+        "llm.token_count.total": 208,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+        ✓  1482 ms  in=371 out=27  $0.002260
+
+  [Q2] Two sequential tool calls — same type
+        → Add 27 and 73, then multiply the result by 2.
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0xab44709eecdea4e6ed820f5e7d695bb9",
+        "span_id": "0x15b50fad293343c4",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:12.167473Z",
+    "end_time": "2026-06-28T16:02:12.821759Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"Add 27 and 73, then multiply the result by 2.\", \"type\": \"human\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"\", \"generation_info\": {\"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 179, \"total_tokens\": 196, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFQiKNSiGHQrcBubbSHnonUUso3\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-8c47-7043-b852-2fac7b93d22a-0\", \"tool_calls\": [{\"name\": \"add\", \"args\": {\"a\": 27, \"b\": 73}, \"id\": \"call_K0OfP3ZVnIORRmretmXnuigL\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 179, \"output_tokens\": 17, \"total_tokens\": 196, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 179, \"total_tokens\": 196, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFQiKNSiGHQrcBubbSHnonUUso3\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "Add 27 and 73, then multiply the result by 2.",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_K0OfP3ZVnIORRmretmXnuigL",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "add",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 27, \"b\": 73}",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 179,
+        "llm.token_count.completion": 17,
+        "llm.token_count.total": 196,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "add",
+    "context": {
+        "trace_id": "0x4a01e94ba979d5d7664207624bc693f0",
+        "span_id": "0x9ad8663df5da046e",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:12.822433Z",
+    "end_time": "2026-06-28T16:02:12.822755Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 27, \"b\": 73}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"100\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"add\", \"id\": null, \"tool_call_id\": \"call_K0OfP3ZVnIORRmretmXnuigL\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "add",
+        "tool.description": "Adds `a` and `b`.\n\n    Args:\n        a: First integer.\n        b: Second integer.",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0x74738ae5199d87d1e012a972273b1192",
+        "span_id": "0xfde47dcadf5d56f2",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:12.823082Z",
+    "end_time": "2026-06-28T16:02:13.429171Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"Add 27 and 73, then multiply the result by 2.\", \"type\": \"human\", \"id\": \"6c08f88e-98e4-4714-8eb6-f67b64d87ea7\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 179, \"total_tokens\": 196, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFQiKNSiGHQrcBubbSHnonUUso3\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-8c47-7043-b852-2fac7b93d22a-0\", \"tool_calls\": [{\"name\": \"add\", \"args\": {\"a\": 27, \"b\": 73}, \"id\": \"call_K0OfP3ZVnIORRmretmXnuigL\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 179, \"output_tokens\": 17, \"total_tokens\": 196, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"100\", \"type\": \"tool\", \"name\": \"add\", \"id\": \"f6b617a4-9add-4444-9d66-ac0f7ab265bf\", \"tool_call_id\": \"call_K0OfP3ZVnIORRmretmXnuigL\", \"status\": \"success\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"\", \"generation_info\": {\"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 204, \"total_tokens\": 221, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFRUP4TfFG9HhfnmqBFldpvXCEq\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-8ed7-7473-aee8-4a8547b2c096-0\", \"tool_calls\": [{\"name\": \"multiply\", \"args\": {\"a\": 100, \"b\": 2}, \"id\": \"call_r9USqiZ4pFFQzsZFnvaH7j0t\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 204, \"output_tokens\": 17, \"total_tokens\": 221, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 204, \"total_tokens\": 221, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFRUP4TfFG9HhfnmqBFldpvXCEq\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "Add 27 and 73, then multiply the result by 2.",
+        "llm.input_messages.2.message.role": "assistant",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.id": "call_K0OfP3ZVnIORRmretmXnuigL",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.name": "add",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 27, \"b\": 73}",
+        "llm.input_messages.3.message.role": "tool",
+        "llm.input_messages.3.message.content": "100",
+        "llm.input_messages.3.message.tool_call_id": "call_K0OfP3ZVnIORRmretmXnuigL",
+        "llm.input_messages.3.message.name": "add",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_r9USqiZ4pFFQzsZFnvaH7j0t",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "multiply",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 100, \"b\": 2}",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 204,
+        "llm.token_count.completion": 17,
+        "llm.token_count.total": 221,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "multiply",
+    "context": {
+        "trace_id": "0xd640071efe79d4539ba6a3bc5beedb6f",
+        "span_id": "0xf73c519502e1d6db",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:13.429724Z",
+    "end_time": "2026-06-28T16:02:13.429984Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 100, \"b\": 2}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"200\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"multiply\", \"id\": null, \"tool_call_id\": \"call_r9USqiZ4pFFQzsZFnvaH7j0t\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "multiply",
+        "tool.description": "Multiplies `a` and `b`.\n\n    Args:\n        a: First integer.\n        b: Second integer.",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0x8e7171acedd262fa93a71c887ff87fb4",
+        "span_id": "0x8319985962a17cb7",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:13.430271Z",
+    "end_time": "2026-06-28T16:02:14.515697Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"Add 27 and 73, then multiply the result by 2.\", \"type\": \"human\", \"id\": \"6c08f88e-98e4-4714-8eb6-f67b64d87ea7\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 179, \"total_tokens\": 196, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFQiKNSiGHQrcBubbSHnonUUso3\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-8c47-7043-b852-2fac7b93d22a-0\", \"tool_calls\": [{\"name\": \"add\", \"args\": {\"a\": 27, \"b\": 73}, \"id\": \"call_K0OfP3ZVnIORRmretmXnuigL\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 179, \"output_tokens\": 17, \"total_tokens\": 196, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"100\", \"type\": \"tool\", \"name\": \"add\", \"id\": \"f6b617a4-9add-4444-9d66-ac0f7ab265bf\", \"tool_call_id\": \"call_K0OfP3ZVnIORRmretmXnuigL\", \"status\": \"success\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 204, \"total_tokens\": 221, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFRUP4TfFG9HhfnmqBFldpvXCEq\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-8ed7-7473-aee8-4a8547b2c096-0\", \"tool_calls\": [{\"name\": \"multiply\", \"args\": {\"a\": 100, \"b\": 2}, \"id\": \"call_r9USqiZ4pFFQzsZFnvaH7j0t\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 204, \"output_tokens\": 17, \"total_tokens\": 221, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"200\", \"type\": \"tool\", \"name\": \"multiply\", \"id\": \"7998c1ed-e8b4-4bc3-8374-b23a4f1a800d\", \"tool_call_id\": \"call_r9USqiZ4pFFQzsZFnvaH7j0t\", \"status\": \"success\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"The result of adding 27 and 73, and then multiplying the result by 2, is 200.\", \"generation_info\": {\"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"The result of adding 27 and 73, and then multiplying the result by 2, is 200.\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 24, \"prompt_tokens\": 229, \"total_tokens\": 253, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFSO90tXxrbfr8buFvl995Vjw43\", \"service_tier\": \"default\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-9136-70b2-9578-64e7bdf6241b-0\", \"usage_metadata\": {\"input_tokens\": 229, \"output_tokens\": 24, \"total_tokens\": 253, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"tool_calls\": [], \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 24, \"prompt_tokens\": 229, \"total_tokens\": 253, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFSO90tXxrbfr8buFvl995Vjw43\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "Add 27 and 73, then multiply the result by 2.",
+        "llm.input_messages.2.message.role": "assistant",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.id": "call_K0OfP3ZVnIORRmretmXnuigL",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.name": "add",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 27, \"b\": 73}",
+        "llm.input_messages.3.message.role": "tool",
+        "llm.input_messages.3.message.content": "100",
+        "llm.input_messages.3.message.tool_call_id": "call_K0OfP3ZVnIORRmretmXnuigL",
+        "llm.input_messages.3.message.name": "add",
+        "llm.input_messages.4.message.role": "assistant",
+        "llm.input_messages.4.message.tool_calls.0.tool_call.id": "call_r9USqiZ4pFFQzsZFnvaH7j0t",
+        "llm.input_messages.4.message.tool_calls.0.tool_call.function.name": "multiply",
+        "llm.input_messages.4.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 100, \"b\": 2}",
+        "llm.input_messages.5.message.role": "tool",
+        "llm.input_messages.5.message.content": "200",
+        "llm.input_messages.5.message.tool_call_id": "call_r9USqiZ4pFFQzsZFnvaH7j0t",
+        "llm.input_messages.5.message.name": "multiply",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.content": "The result of adding 27 and 73, and then multiplying the result by 2, is 200.",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 229,
+        "llm.token_count.completion": 24,
+        "llm.token_count.total": 253,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+        ✓  2349 ms  in=612 out=58  $0.003930
+
+  [Q3] Two sequential tool calls — different types
+        → Divide 100 by 4, then add 13.
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0x8f35d1799f325262d0e7fa037a08b292",
+        "span_id": "0x0788c2974108dfff",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:14.517088Z",
+    "end_time": "2026-06-28T16:02:18.863026Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"Divide 100 by 4, then add 13.\", \"type\": \"human\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"\", \"generation_info\": {\"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 176, \"total_tokens\": 226, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFWmXWES9OZu368oUUwdVOTw7sS\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-9575-7e23-b6eb-b0250057ee4a-0\", \"tool_calls\": [{\"name\": \"divide\", \"args\": {\"a\": 100, \"b\": 4}, \"id\": \"call_9L82ePZjQeoE4AnZesxUIYfr\", \"type\": \"tool_call\"}, {\"name\": \"add\", \"args\": {\"a\": 25, \"b\": 13}, \"id\": \"call_mlO0nA19M0vjeTpGuEjsSWOL\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 176, \"output_tokens\": 50, \"total_tokens\": 226, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 176, \"total_tokens\": 226, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFWmXWES9OZu368oUUwdVOTw7sS\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "Divide 100 by 4, then add 13.",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_9L82ePZjQeoE4AnZesxUIYfr",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "divide",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 100, \"b\": 4}",
+        "llm.output_messages.0.message.tool_calls.1.tool_call.id": "call_mlO0nA19M0vjeTpGuEjsSWOL",
+        "llm.output_messages.0.message.tool_calls.1.tool_call.function.name": "add",
+        "llm.output_messages.0.message.tool_calls.1.tool_call.function.arguments": "{\"a\": 25, \"b\": 13}",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 176,
+        "llm.token_count.completion": 50,
+        "llm.token_count.total": 226,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "divide",
+    "context": {
+        "trace_id": "0xfee40fd259f73af0e50cc7ca0c288778",
+        "span_id": "0xa9401d78d216ee71",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:18.863783Z",
+    "end_time": "2026-06-28T16:02:18.864151Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 100, \"b\": 4}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"25.0\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"divide\", \"id\": null, \"tool_call_id\": \"call_9L82ePZjQeoE4AnZesxUIYfr\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "divide",
+        "tool.description": "Divides `a` by `b`.\n\n    Args:\n        a: Numerator.\n        b: Denominator (must not be zero).",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "add",
+    "context": {
+        "trace_id": "0x9811d04d477503bf4f330268b256beee",
+        "span_id": "0xd56173214a3bc74c",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:18.864416Z",
+    "end_time": "2026-06-28T16:02:18.864635Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 25, \"b\": 13}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"38\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"add\", \"id\": null, \"tool_call_id\": \"call_mlO0nA19M0vjeTpGuEjsSWOL\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "add",
+        "tool.description": "Adds `a` and `b`.\n\n    Args:\n        a: First integer.\n        b: Second integer.",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0xdb05a3284079c13b3d74a968fb0170f1",
+        "span_id": "0x8ee7becd6bd0c741",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:18.864889Z",
+    "end_time": "2026-06-28T16:02:19.529864Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"Divide 100 by 4, then add 13.\", \"type\": \"human\", \"id\": \"00d020a2-d4f4-4261-be8f-0751c0724c78\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 176, \"total_tokens\": 226, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFWmXWES9OZu368oUUwdVOTw7sS\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-9575-7e23-b6eb-b0250057ee4a-0\", \"tool_calls\": [{\"name\": \"divide\", \"args\": {\"a\": 100, \"b\": 4}, \"id\": \"call_9L82ePZjQeoE4AnZesxUIYfr\", \"type\": \"tool_call\"}, {\"name\": \"add\", \"args\": {\"a\": 25, \"b\": 13}, \"id\": \"call_mlO0nA19M0vjeTpGuEjsSWOL\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 176, \"output_tokens\": 50, \"total_tokens\": 226, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"25.0\", \"type\": \"tool\", \"name\": \"divide\", \"id\": \"b99a84ac-4cf9-4e9f-8b5a-5657eff1a188\", \"tool_call_id\": \"call_9L82ePZjQeoE4AnZesxUIYfr\", \"status\": \"success\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"38\", \"type\": \"tool\", \"name\": \"add\", \"id\": \"17e30e69-c8d3-457a-91f4-1bef5e4802e1\", \"tool_call_id\": \"call_mlO0nA19M0vjeTpGuEjsSWOL\", \"status\": \"success\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"The result of dividing 100 by 4 and then adding 13 is 38.\", \"generation_info\": {\"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"The result of dividing 100 by 4 and then adding 13 is 38.\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 19, \"prompt_tokens\": 244, \"total_tokens\": 263, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFXuAipXCBYov6FXCin4jdsqa3v\", \"service_tier\": \"default\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-a670-7c91-958b-d00dbf871f92-0\", \"usage_metadata\": {\"input_tokens\": 244, \"output_tokens\": 19, \"total_tokens\": 263, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"tool_calls\": [], \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 19, \"prompt_tokens\": 244, \"total_tokens\": 263, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFXuAipXCBYov6FXCin4jdsqa3v\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "Divide 100 by 4, then add 13.",
+        "llm.input_messages.2.message.role": "assistant",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.id": "call_9L82ePZjQeoE4AnZesxUIYfr",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.name": "divide",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 100, \"b\": 4}",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.id": "call_mlO0nA19M0vjeTpGuEjsSWOL",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.function.name": "add",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.function.arguments": "{\"a\": 25, \"b\": 13}",
+        "llm.input_messages.3.message.role": "tool",
+        "llm.input_messages.3.message.content": "25.0",
+        "llm.input_messages.3.message.tool_call_id": "call_9L82ePZjQeoE4AnZesxUIYfr",
+        "llm.input_messages.3.message.name": "divide",
+        "llm.input_messages.4.message.role": "tool",
+        "llm.input_messages.4.message.content": "38",
+        "llm.input_messages.4.message.tool_call_id": "call_mlO0nA19M0vjeTpGuEjsSWOL",
+        "llm.input_messages.4.message.name": "add",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.content": "The result of dividing 100 by 4 and then adding 13 is 38.",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 244,
+        "llm.token_count.completion": 19,
+        "llm.token_count.total": 263,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+        ✓  5013 ms  in=420 out=69  $0.003135
+
+  [Q4] Chained output between calls
+        → Multiply 8 by 9, then divide the result by 6.
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0x56d612de9bc0d2ccf87b18054fa1b39e",
+        "span_id": "0x0b00472f463e3858",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:19.531740Z",
+    "end_time": "2026-06-28T16:02:20.460656Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"Multiply 8 by 9, then divide the result by 6.\", \"type\": \"human\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"\", \"generation_info\": {\"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 179, \"total_tokens\": 229, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFXiNdVcOJa5i4wcWUDHPGS4RIL\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-a90b-71d2-9ba0-2eaf8c6f4089-0\", \"tool_calls\": [{\"name\": \"multiply\", \"args\": {\"a\": 8, \"b\": 9}, \"id\": \"call_HekdoB45Yi51wHcFD39dqXNH\", \"type\": \"tool_call\"}, {\"name\": \"divide\", \"args\": {\"a\": 72, \"b\": 6}, \"id\": \"call_m8onHyomxOKnxVZeKf8pQFXd\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 179, \"output_tokens\": 50, \"total_tokens\": 229, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 179, \"total_tokens\": 229, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFXiNdVcOJa5i4wcWUDHPGS4RIL\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "Multiply 8 by 9, then divide the result by 6.",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_HekdoB45Yi51wHcFD39dqXNH",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "multiply",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 8, \"b\": 9}",
+        "llm.output_messages.0.message.tool_calls.1.tool_call.id": "call_m8onHyomxOKnxVZeKf8pQFXd",
+        "llm.output_messages.0.message.tool_calls.1.tool_call.function.name": "divide",
+        "llm.output_messages.0.message.tool_calls.1.tool_call.function.arguments": "{\"a\": 72, \"b\": 6}",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 179,
+        "llm.token_count.completion": 50,
+        "llm.token_count.total": 229,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "multiply",
+    "context": {
+        "trace_id": "0x9c5ff848457c0fe77303da766992790d",
+        "span_id": "0x032338464639a30b",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:20.461191Z",
+    "end_time": "2026-06-28T16:02:20.461446Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 8, \"b\": 9}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"72\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"multiply\", \"id\": null, \"tool_call_id\": \"call_HekdoB45Yi51wHcFD39dqXNH\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "multiply",
+        "tool.description": "Multiplies `a` and `b`.\n\n    Args:\n        a: First integer.\n        b: Second integer.",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "divide",
+    "context": {
+        "trace_id": "0xaa6cf2bbf12ba07e30cf3a3a884e5989",
+        "span_id": "0x6307909479d927cb",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:20.461615Z",
+    "end_time": "2026-06-28T16:02:20.461774Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 72, \"b\": 6}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"12.0\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"divide\", \"id\": null, \"tool_call_id\": \"call_m8onHyomxOKnxVZeKf8pQFXd\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "divide",
+        "tool.description": "Divides `a` by `b`.\n\n    Args:\n        a: Numerator.\n        b: Denominator (must not be zero).",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0x4bd98e0bc411e30a0bb7ae9f608a2dde",
+        "span_id": "0xfdc5b0bcc78e6aa7",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:20.462013Z",
+    "end_time": "2026-06-28T16:02:21.280150Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"Multiply 8 by 9, then divide the result by 6.\", \"type\": \"human\", \"id\": \"d6e19ef7-1712-49a7-8666-c78c7973a26e\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 179, \"total_tokens\": 229, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFXiNdVcOJa5i4wcWUDHPGS4RIL\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-a90b-71d2-9ba0-2eaf8c6f4089-0\", \"tool_calls\": [{\"name\": \"multiply\", \"args\": {\"a\": 8, \"b\": 9}, \"id\": \"call_HekdoB45Yi51wHcFD39dqXNH\", \"type\": \"tool_call\"}, {\"name\": \"divide\", \"args\": {\"a\": 72, \"b\": 6}, \"id\": \"call_m8onHyomxOKnxVZeKf8pQFXd\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 179, \"output_tokens\": 50, \"total_tokens\": 229, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"72\", \"type\": \"tool\", \"name\": \"multiply\", \"id\": \"e9756024-5092-45e6-9a4a-62d071ee298d\", \"tool_call_id\": \"call_HekdoB45Yi51wHcFD39dqXNH\", \"status\": \"success\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"12.0\", \"type\": \"tool\", \"name\": \"divide\", \"id\": \"e2152781-bbfc-4254-9cca-ef0f9d883252\", \"tool_call_id\": \"call_m8onHyomxOKnxVZeKf8pQFXd\", \"status\": \"success\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"The result of multiplying 8 by 9 is 72, and dividing that result by 6 gives 12.\", \"generation_info\": {\"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"The result of multiplying 8 by 9 is 72, and dividing that result by 6 gives 12.\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 25, \"prompt_tokens\": 247, \"total_tokens\": 272, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFYSMGsDSDqPxnbwD1nGXcCeTa5\", \"service_tier\": \"default\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-acae-72e3-851a-5504830f4417-0\", \"usage_metadata\": {\"input_tokens\": 247, \"output_tokens\": 25, \"total_tokens\": 272, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"tool_calls\": [], \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 25, \"prompt_tokens\": 247, \"total_tokens\": 272, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFYSMGsDSDqPxnbwD1nGXcCeTa5\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "Multiply 8 by 9, then divide the result by 6.",
+        "llm.input_messages.2.message.role": "assistant",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.id": "call_HekdoB45Yi51wHcFD39dqXNH",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.name": "multiply",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 8, \"b\": 9}",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.id": "call_m8onHyomxOKnxVZeKf8pQFXd",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.function.name": "divide",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.function.arguments": "{\"a\": 72, \"b\": 6}",
+        "llm.input_messages.3.message.role": "tool",
+        "llm.input_messages.3.message.content": "72",
+        "llm.input_messages.3.message.tool_call_id": "call_HekdoB45Yi51wHcFD39dqXNH",
+        "llm.input_messages.3.message.name": "multiply",
+        "llm.input_messages.4.message.role": "tool",
+        "llm.input_messages.4.message.content": "12.0",
+        "llm.input_messages.4.message.tool_call_id": "call_m8onHyomxOKnxVZeKf8pQFXd",
+        "llm.input_messages.4.message.name": "divide",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.content": "The result of multiplying 8 by 9 is 72, and dividing that result by 6 gives 12.",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 247,
+        "llm.token_count.completion": 25,
+        "llm.token_count.total": 272,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+        ✓  1749 ms  in=426 out=75  $0.003255
+
+  [Q5] Three tool calls — longest trace
+        → What is 15 divided by 3? Then multiply that by 5. Then add 10.
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0xbe25c7638725ab06f5b0a54297fd13e5",
+        "span_id": "0x63a6e3c80f2a96aa",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:21.281190Z",
+    "end_time": "2026-06-28T16:02:22.087750Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"What is 15 divided by 3? Then multiply that by 5. Then add 10.\", \"type\": \"human\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"\", \"generation_info\": {\"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 185, \"total_tokens\": 235, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFZgBTWl8zxW5JJzFsPUktk6YY8\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-afe1-7c30-b7fb-6a74dd35746f-0\", \"tool_calls\": [{\"name\": \"divide\", \"args\": {\"a\": 15, \"b\": 3}, \"id\": \"call_WEZRXou1SrrVuRpSzFBv3myM\", \"type\": \"tool_call\"}, {\"name\": \"multiply\", \"args\": {\"a\": 5, \"b\": 5}, \"id\": \"call_Tlq2b0igLNvQTK5J7rwlG4mB\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 185, \"output_tokens\": 50, \"total_tokens\": 235, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 185, \"total_tokens\": 235, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFZgBTWl8zxW5JJzFsPUktk6YY8\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "What is 15 divided by 3? Then multiply that by 5. Then add 10.",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_WEZRXou1SrrVuRpSzFBv3myM",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "divide",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 15, \"b\": 3}",
+        "llm.output_messages.0.message.tool_calls.1.tool_call.id": "call_Tlq2b0igLNvQTK5J7rwlG4mB",
+        "llm.output_messages.0.message.tool_calls.1.tool_call.function.name": "multiply",
+        "llm.output_messages.0.message.tool_calls.1.tool_call.function.arguments": "{\"a\": 5, \"b\": 5}",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 185,
+        "llm.token_count.completion": 50,
+        "llm.token_count.total": 235,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "divide",
+    "context": {
+        "trace_id": "0x8b345376584c97d415d12c62010f35b7",
+        "span_id": "0xee74911e7838de94",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:22.088642Z",
+    "end_time": "2026-06-28T16:02:22.089114Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 15, \"b\": 3}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"5.0\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"divide\", \"id\": null, \"tool_call_id\": \"call_WEZRXou1SrrVuRpSzFBv3myM\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "divide",
+        "tool.description": "Divides `a` by `b`.\n\n    Args:\n        a: Numerator.\n        b: Denominator (must not be zero).",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "multiply",
+    "context": {
+        "trace_id": "0x10fb62a44f9acdcd8ee43800e180d392",
+        "span_id": "0x8bbe2fcb7897121b",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:22.089379Z",
+    "end_time": "2026-06-28T16:02:22.089633Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 5, \"b\": 5}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"25\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"multiply\", \"id\": null, \"tool_call_id\": \"call_Tlq2b0igLNvQTK5J7rwlG4mB\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "multiply",
+        "tool.description": "Multiplies `a` and `b`.\n\n    Args:\n        a: First integer.\n        b: Second integer.",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0x69d8460e1a759788db7fc1ca1803dafe",
+        "span_id": "0x46526acffa71901f",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:22.090055Z",
+    "end_time": "2026-06-28T16:02:22.728412Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"What is 15 divided by 3? Then multiply that by 5. Then add 10.\", \"type\": \"human\", \"id\": \"d2daaaf9-f0af-401a-ac31-0b20d1839db6\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 185, \"total_tokens\": 235, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFZgBTWl8zxW5JJzFsPUktk6YY8\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-afe1-7c30-b7fb-6a74dd35746f-0\", \"tool_calls\": [{\"name\": \"divide\", \"args\": {\"a\": 15, \"b\": 3}, \"id\": \"call_WEZRXou1SrrVuRpSzFBv3myM\", \"type\": \"tool_call\"}, {\"name\": \"multiply\", \"args\": {\"a\": 5, \"b\": 5}, \"id\": \"call_Tlq2b0igLNvQTK5J7rwlG4mB\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 185, \"output_tokens\": 50, \"total_tokens\": 235, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"5.0\", \"type\": \"tool\", \"name\": \"divide\", \"id\": \"8b7791cb-8dee-422f-873f-6d137cfa2a5d\", \"tool_call_id\": \"call_WEZRXou1SrrVuRpSzFBv3myM\", \"status\": \"success\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"25\", \"type\": \"tool\", \"name\": \"multiply\", \"id\": \"0d014f09-990a-410e-a94e-a98495c86a6a\", \"tool_call_id\": \"call_Tlq2b0igLNvQTK5J7rwlG4mB\", \"status\": \"success\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"\", \"generation_info\": {\"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 253, \"total_tokens\": 270, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFalhe7LloX98HjBDG8syYPHem4\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-b30a-7e33-a860-815424cd6808-0\", \"tool_calls\": [{\"name\": \"add\", \"args\": {\"a\": 25, \"b\": 10}, \"id\": \"call_uflvALP0rKB2oVwyIWOuUKxc\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 253, \"output_tokens\": 17, \"total_tokens\": 270, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 253, \"total_tokens\": 270, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFalhe7LloX98HjBDG8syYPHem4\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "What is 15 divided by 3? Then multiply that by 5. Then add 10.",
+        "llm.input_messages.2.message.role": "assistant",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.id": "call_WEZRXou1SrrVuRpSzFBv3myM",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.name": "divide",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 15, \"b\": 3}",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.id": "call_Tlq2b0igLNvQTK5J7rwlG4mB",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.function.name": "multiply",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.function.arguments": "{\"a\": 5, \"b\": 5}",
+        "llm.input_messages.3.message.role": "tool",
+        "llm.input_messages.3.message.content": "5.0",
+        "llm.input_messages.3.message.tool_call_id": "call_WEZRXou1SrrVuRpSzFBv3myM",
+        "llm.input_messages.3.message.name": "divide",
+        "llm.input_messages.4.message.role": "tool",
+        "llm.input_messages.4.message.content": "25",
+        "llm.input_messages.4.message.tool_call_id": "call_Tlq2b0igLNvQTK5J7rwlG4mB",
+        "llm.input_messages.4.message.name": "multiply",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_uflvALP0rKB2oVwyIWOuUKxc",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "add",
+        "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 25, \"b\": 10}",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 253,
+        "llm.token_count.completion": 17,
+        "llm.token_count.total": 270,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "add",
+    "context": {
+        "trace_id": "0xf61ecfb8c4517bdde9c9112b72f3eb0d",
+        "span_id": "0x454e1e7f7cd9e7c4",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:22.729284Z",
+    "end_time": "2026-06-28T16:02:22.729661Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"a\": 25, \"b\": 10}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"content\": \"35\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"add\", \"id\": null, \"tool_call_id\": \"call_uflvALP0rKB2oVwyIWOuUKxc\", \"artifact\": null, \"status\": \"success\"}",
+        "output.mime_type": "application/json",
+        "tool.name": "add",
+        "tool.description": "Adds `a` and `b`.\n\n    Args:\n        a: First integer.\n        b: Second integer.",
+        "openinference.span.kind": "TOOL"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+{
+    "name": "ChatOpenAI",
+    "context": {
+        "trace_id": "0xdc86c2e1834cc0900c0c7a1fa1024fba",
+        "span_id": "0x4324e32142c56d4e",
+        "trace_state": "[]"
+    },
+    "kind": "SpanKind.INTERNAL",
+    "parent_id": null,
+    "start_time": "2026-06-28T16:02:22.730054Z",
+    "end_time": "2026-06-28T16:02:23.636658Z",
+    "status": {
+        "status_code": "OK"
+    },
+    "attributes": {
+        "input.value": "{\"messages\": [[{\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"SystemMessage\"], \"kwargs\": {\"content\": \"You are a helpful assistant tasked with performing arithmetic.\\nUse the provided tools to compute the answer.\", \"type\": \"system\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"HumanMessage\"], \"kwargs\": {\"content\": \"What is 15 divided by 3? Then multiply that by 5. Then add 10.\", \"type\": \"human\", \"id\": \"d2daaaf9-f0af-401a-ac31-0b20d1839db6\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 50, \"prompt_tokens\": 185, \"total_tokens\": 235, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFZgBTWl8zxW5JJzFsPUktk6YY8\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-afe1-7c30-b7fb-6a74dd35746f-0\", \"tool_calls\": [{\"name\": \"divide\", \"args\": {\"a\": 15, \"b\": 3}, \"id\": \"call_WEZRXou1SrrVuRpSzFBv3myM\", \"type\": \"tool_call\"}, {\"name\": \"multiply\", \"args\": {\"a\": 5, \"b\": 5}, \"id\": \"call_Tlq2b0igLNvQTK5J7rwlG4mB\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 185, \"output_tokens\": 50, \"total_tokens\": 235, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"5.0\", \"type\": \"tool\", \"name\": \"divide\", \"id\": \"8b7791cb-8dee-422f-873f-6d137cfa2a5d\", \"tool_call_id\": \"call_WEZRXou1SrrVuRpSzFBv3myM\", \"status\": \"success\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"25\", \"type\": \"tool\", \"name\": \"multiply\", \"id\": \"0d014f09-990a-410e-a94e-a98495c86a6a\", \"tool_call_id\": \"call_Tlq2b0igLNvQTK5J7rwlG4mB\", \"status\": \"success\"}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 17, \"prompt_tokens\": 253, \"total_tokens\": 270, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFalhe7LloX98HjBDG8syYPHem4\", \"service_tier\": \"default\", \"finish_reason\": \"tool_calls\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-b30a-7e33-a860-815424cd6808-0\", \"tool_calls\": [{\"name\": \"add\", \"args\": {\"a\": 25, \"b\": 10}, \"id\": \"call_uflvALP0rKB2oVwyIWOuUKxc\", \"type\": \"tool_call\"}], \"usage_metadata\": {\"input_tokens\": 253, \"output_tokens\": 17, \"total_tokens\": 270, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"invalid_tool_calls\": []}}, {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"ToolMessage\"], \"kwargs\": {\"content\": \"35\", \"type\": \"tool\", \"name\": \"add\", \"id\": \"d98232ab-5a71-4238-987c-44c1bd8285db\", \"tool_call_id\": \"call_uflvALP0rKB2oVwyIWOuUKxc\", \"status\": \"success\"}}]]}",
+        "input.mime_type": "application/json",
+        "output.value": "{\"generations\": [[{\"text\": \"The result of the calculation is 35.\", \"generation_info\": {\"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ChatGeneration\", \"message\": {\"lc\": 1, \"type\": \"constructor\", \"id\": [\"langchain\", \"schema\", \"messages\", \"AIMessage\"], \"kwargs\": {\"content\": \"The result of the calculation is 35.\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 10, \"prompt_tokens\": 278, \"total_tokens\": 288, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFboTM9lHP0rDYAzYqBm2uySHpq\", \"service_tier\": \"default\", \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"id\": \"lc_run--019f0ef7-b58a-7f02-82dc-fcc69ecd5583-0\", \"usage_metadata\": {\"input_tokens\": 278, \"output_tokens\": 10, \"total_tokens\": 288, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 0}}, \"tool_calls\": [], \"invalid_tool_calls\": []}}}]], \"llm_output\": {\"token_usage\": {\"completion_tokens\": 10, \"prompt_tokens\": 278, \"total_tokens\": 288, \"completion_tokens_details\": {\"accepted_prediction_tokens\": 0, \"audio_tokens\": 0, \"reasoning_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_provider\": \"openai\", \"model_name\": \"gpt-4o-2024-08-06\", \"system_fingerprint\": \"fp_35ed4b8624\", \"id\": \"chatcmpl-DvmFboTM9lHP0rDYAzYqBm2uySHpq\", \"service_tier\": \"default\"}, \"run\": null, \"type\": \"LLMResult\"}",
+        "output.mime_type": "application/json",
+        "llm.input_messages.0.message.role": "system",
+        "llm.input_messages.0.message.content": "You are a helpful assistant tasked with performing arithmetic.\nUse the provided tools to compute the answer.",
+        "llm.input_messages.1.message.role": "user",
+        "llm.input_messages.1.message.content": "What is 15 divided by 3? Then multiply that by 5. Then add 10.",
+        "llm.input_messages.2.message.role": "assistant",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.id": "call_WEZRXou1SrrVuRpSzFBv3myM",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.name": "divide",
+        "llm.input_messages.2.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 15, \"b\": 3}",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.id": "call_Tlq2b0igLNvQTK5J7rwlG4mB",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.function.name": "multiply",
+        "llm.input_messages.2.message.tool_calls.1.tool_call.function.arguments": "{\"a\": 5, \"b\": 5}",
+        "llm.input_messages.3.message.role": "tool",
+        "llm.input_messages.3.message.content": "5.0",
+        "llm.input_messages.3.message.tool_call_id": "call_WEZRXou1SrrVuRpSzFBv3myM",
+        "llm.input_messages.3.message.name": "divide",
+        "llm.input_messages.4.message.role": "tool",
+        "llm.input_messages.4.message.content": "25",
+        "llm.input_messages.4.message.tool_call_id": "call_Tlq2b0igLNvQTK5J7rwlG4mB",
+        "llm.input_messages.4.message.name": "multiply",
+        "llm.input_messages.5.message.role": "assistant",
+        "llm.input_messages.5.message.tool_calls.0.tool_call.id": "call_uflvALP0rKB2oVwyIWOuUKxc",
+        "llm.input_messages.5.message.tool_calls.0.tool_call.function.name": "add",
+        "llm.input_messages.5.message.tool_calls.0.tool_call.function.arguments": "{\"a\": 25, \"b\": 10}",
+        "llm.input_messages.6.message.role": "tool",
+        "llm.input_messages.6.message.content": "35",
+        "llm.input_messages.6.message.tool_call_id": "call_uflvALP0rKB2oVwyIWOuUKxc",
+        "llm.input_messages.6.message.name": "add",
+        "llm.output_messages.0.message.role": "assistant",
+        "llm.output_messages.0.message.content": "The result of the calculation is 35.",
+        "llm.invocation_parameters": "{\"model\": \"gpt-4o\", \"model_name\": \"gpt-4o\", \"stream\": false, \"temperature\": 0.0, \"_type\": \"openai-chat\", \"stop\": null, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}, {\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}]}",
+        "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"add\", \"description\": \"Adds `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.1.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"multiply\", \"description\": \"Multiplies `a` and `b`.\\n\\n    Args:\\n        a: First integer.\\n        b: Second integer.\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.tools.2.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"divide\", \"description\": \"Divides `a` by `b`.\\n\\n    Args:\\n        a: Numerator.\\n        b: Denominator (must not be zero).\", \"parameters\": {\"properties\": {\"a\": {\"type\": \"integer\"}, \"b\": {\"type\": \"integer\"}}, \"required\": [\"a\", \"b\"], \"type\": \"object\"}}}",
+        "llm.provider": "openai",
+        "llm.system": "openai",
+        "llm.model_name": "gpt-4o-2024-08-06",
+        "llm.token_count.prompt": 278,
+        "llm.token_count.completion": 10,
+        "llm.token_count.total": 288,
+        "llm.token_count.completion_details.audio": 0,
+        "llm.token_count.completion_details.reasoning": 0,
+        "llm.token_count.prompt_details.audio": 0,
+        "llm.token_count.prompt_details.cache_read": 0,
+        "metadata": "{\"ls_provider\": \"openai\", \"ls_model_name\": \"gpt-4o\", \"ls_model_type\": \"chat\", \"ls_temperature\": 0.0, \"ls_integration\": \"langchain_chat_model\", \"lc_versions\": {\"langchain-core\": \"1.4.8\", \"langchain\": \"1.2.12\"}}",
+        "openinference.span.kind": "LLM"
+    },
+    "events": [],
+    "links": [],
+    "resource": {
+        "attributes": {
+            "service.name": "vt1-simple-agent",
+            "service.version": "0.1.0",
+            "deployment.environment": "local"
+        },
+        "schema_url": ""
+    }
+}
+        ✓  2357 ms  in=716 out=77  $0.004735
+
+
+==============================================================
+  SUMMARY
+==============================================================
+  ID       Latency   In tok  Out tok    Cost (USD)  Status
+  ----  ----------  -------  -------  ------------  ------
+  Q1         1482ms      371       27  $   0.002260  OK
+  Q2         2349ms      612       58  $   0.003930  OK
+  Q3         5013ms      420       69  $   0.003135  OK
+  Q4         1749ms      426       75  $   0.003255  OK
+  Q5         2357ms      716       77  $   0.004735  OK
+  ────  ──────────  ───────  ───────  ────────────
+  TOT       12950ms     2545      306  $   0.017315
+
+  Saved → experiments/simple_agent/runs/round1-otel-stdout-001.json
+

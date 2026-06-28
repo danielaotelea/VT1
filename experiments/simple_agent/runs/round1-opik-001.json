@@ -1,0 +1,76 @@
+{
+  "session_id": "round1-opik-001",
+  "exporter": "opik",
+  "timestamp_utc": "2026-06-28T15:29:06.306810+00:00",
+  "model": "gpt-4o",
+  "sampling_rate": 1.0,
+  "queries": [
+    {
+      "id": "Q1",
+      "description": "Single tool call",
+      "prompt": "What is 6 multiplied by 7?",
+      "expected": "42",
+      "output": "[human] What is 6 multiplied by 7?\n[tool:multiply({'a': 6, 'b': 7})]\n[tool] 42\n[ai] 6 multiplied by 7 is 42.",
+      "latency_ms": 2726.9,
+      "input_tokens": 371,
+      "output_tokens": 27,
+      "cost_usd": 0.00226,
+      "error": null
+    },
+    {
+      "id": "Q2",
+      "description": "Two sequential tool calls — same type",
+      "prompt": "Add 27 and 73, then multiply the result by 2.",
+      "expected": "200",
+      "output": "[human] Add 27 and 73, then multiply the result by 2.\n[tool:add({'a': 27, 'b': 73})]\n[tool] 100\n[tool:multiply({'a': 100, 'b': 2})]\n[tool] 200\n[ai] The result of adding 27 and 73, then multiplying the result by 2, is 200.",
+      "latency_ms": 2637.6,
+      "input_tokens": 612,
+      "output_tokens": 73,
+      "cost_usd": 0.004155,
+      "error": null
+    },
+    {
+      "id": "Q3",
+      "description": "Two sequential tool calls — different types",
+      "prompt": "Divide 100 by 4, then add 13.",
+      "expected": "38.0",
+      "output": "[human] Divide 100 by 4, then add 13.\n[tool:divide({'a': 100, 'b': 4})]\n[tool:add({'a': 25, 'b': 13})]\n[tool] 25.0\n[tool] 38\n[ai] Dividing 100 by 4 gives 25. Adding 13 to 25 gives 38.",
+      "latency_ms": 1863.2,
+      "input_tokens": 420,
+      "output_tokens": 72,
+      "cost_usd": 0.00318,
+      "error": null
+    },
+    {
+      "id": "Q4",
+      "description": "Chained output between calls",
+      "prompt": "Multiply 8 by 9, then divide the result by 6.",
+      "expected": "12.0",
+      "output": "[human] Multiply 8 by 9, then divide the result by 6.\n[tool:multiply({'a': 8, 'b': 9})]\n[tool:divide({'a': 72, 'b': 6})]\n[tool] 72\n[tool] 12.0\n[ai] The result of multiplying 8 by 9 is 72, and dividing that result by 6 gives 12.0.",
+      "latency_ms": 1535.1,
+      "input_tokens": 426,
+      "output_tokens": 77,
+      "cost_usd": 0.003285,
+      "error": null
+    },
+    {
+      "id": "Q5",
+      "description": "Three tool calls — longest trace",
+      "prompt": "What is 15 divided by 3? Then multiply that by 5. Then add 10.",
+      "expected": "35.0",
+      "output": "[human] What is 15 divided by 3? Then multiply that by 5. Then add 10.\n[tool:divide({'a': 15, 'b': 3})]\n[tool] 5.0\n[tool:multiply({'a': 5, 'b': 5})]\n[tool] 25\n[tool:add({'a': 25, 'b': 10})]\n[tool] 35\n[ai] The result is 35.",
+      "latency_ms": 2455.3,
+      "input_tokens": 896,
+      "output_tokens": 58,
+      "cost_usd": 0.00535,
+      "error": null
+    }
+  ],
+  "totals": {
+    "latency_ms": 11218.1,
+    "input_tokens": 2725,
+    "output_tokens": 307,
+    "cost_usd": 0.01823,
+    "errors": 0
+  }
+}

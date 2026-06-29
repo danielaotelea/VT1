@@ -71,34 +71,21 @@ Detect instability, inefficiency, or drift in real time to maintain robust agent
 ***
 
 
-## Other metrics to consider:
+## Additional Metrics
 
-- **Agent "Vbe"/Sentiment Drift**: In long-running sessions, agents can become "lazy" or overly verbose (sycophancy). Logging a "helpfulness" or "conciseness" score via a small LLM evaluator can catch personality drift.
-- **Failure Attribution/DHARMA**: When an agent fails to complete a task, log the last successful reasoning step and tool call to help identify failure points in the reasoning chain.
-- **Human-in-the-loop (HITL) Metrics**: When an agent hits a "boundary" (ambiguity or low confidence), the handoff to a human creates a massive spike in both latency (UX) and operational cost (Labor).
------ 
-# Notes 
-* Agent "Vibe" or Sentiment Drift: [Vibe AIGC: A New Paradigm for Content Generation via Agentic Orchestration (Feb 2026)](https://arxiv.org/html/2602.10473v1)
-The Concept: This paper formalizes the "Vibe" not as a feeling, but as a high-level representation of aesthetic preferences, functional logic, and brand persona.
-Moving away from "Prompt Engineering" toward "Agentic Orchestration," the observability goal changes. We are no longer measuring if a prompt worked, but whether the agentic pipeline is maintaining the "Vibe" (the core intent) across complex, multi-step workflows.
+Three further metrics are worth considering for production deployments.
 
-
-* The "Weak Link" & DHARMA Metric: [Paper: Exposing Weak Links in Multi-Agent Systems Under Adversarial Prompting - ICLR 2026](https://arxiv.org/abs/2511.10949)
-The Concept: This paper explicitly uses the term "Weak Link" to describe vulnerabilities in multi-agent pipelines. It argues that while a system may fail as a whole, the failure usually originates at a specific node (the weak link) that either misunderstood the intent or failed to pass the correct context.
-The Metric: It introduces DHARMA, a diagnostic measure designed to perform "Failure Attribution." It labels trajectories to identify if the "Planner" failed, or if a "Sub-agent" ignored a warning, effectively pinpointing the responsible agent in the chain.
-
-* HITL Metrics:
-  * Intervention Rate (The "Autonomy Index"): This measures the degree of agent independence. This is the primary KPI for your Safety and Performance sections. 
-    * Why it matters: A high intervention rate suggests your agent’s Governance & Guardrails are too sensitive or its Reasoning Depth is insufficient for the task complexity.
-  * Human Wait Time: This measures the latency introduced by human intervention. It’s critical for user experience and operational cost management. 
-    * Why it matters: A long wait time can lead to user frustration and increased labor costs, especially if the agent frequently hits boundaries that require human input.
-    * [Orchestration Latency](papers/agentic-ai-orchestration-latency.pdf) highlights that for enterprise agents, the "vibe" often dies not because the AI is slow, but because the human-in-the-loop is the bottleneck.Impact on UX: In a chat-based agent, a "Wait Time" $> 60$ seconds typically leads to a 40% drop in user satisfaction, even if the eventual answer is perfect.
-
-
+- **Sentiment Drift**: In long-running sessions, agents can become overly terse or verbose. Logging a conciseness or helpfulness score via a small LLM evaluator can detect behavioral drift over time [1].
+- **Failure Attribution (DHARMA)**: When an agent fails, log the last successful reasoning step and tool call to identify the failure origin. The DHARMA metric labels execution trajectories to pinpoint whether the Orchestrator or a Sub-agent caused the failure [2].
+- **Human-in-the-loop (HITL) Rate**: When an agent escalates to a human due to ambiguity or low confidence, this creates a measurable spike in latency and cost. Key sub-metrics: *Intervention Rate* (share of sessions requiring HITL) and *Human Wait Time* (latency added by the handoff).
 
 ---
-# Other things to consider:
-https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents
 
+## References
 
-https://arxiv.org/html/2503.06745v1
+| # | Source |
+|---|---|
+| [1] | *Vibe AIGC: A New Paradigm for Content Generation via Agentic Orchestration* (Feb 2026). https://arxiv.org/html/2602.10473v1 |
+| [2] | *Exposing Weak Links in Multi-Agent Systems Under Adversarial Prompting* — ICLR 2026. https://arxiv.org/abs/2511.10949 |
+| [3] | Anthropic. *Demystifying Evals for AI Agents*. https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents |
+| [4] | *A Survey on AI Agent Evaluation* (2025). https://arxiv.org/html/2503.06745v1 |

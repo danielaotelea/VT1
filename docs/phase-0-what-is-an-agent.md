@@ -1,17 +1,16 @@
 # What is an AI Agent?
 
-An AI agent is a piece of software that use AI to complete a task of behalf of users.
-As a **"Digital Brain"** with 3 peripheral components:
+An AI agent is a piece of software that uses AI to complete tasks on behalf of users. It acts as a **"Digital Brain"** with three peripheral components:
 
-* Memory <Context> : Stores past interactions, knowledge, and context to inform future decisions.
-* Planning <Execution> : to break the task into smaller steps
-* Tools <Interaction> : to interact with the external world, such as APIs, databases, or other software systems.
+* **Memory** (Context): Stores past interactions, knowledge, and context to inform future decisions.
+* **Planning** (Execution): Breaks the task into smaller steps and decides the order of actions.
+* **Tools** (Interaction): Interacts with the external world through APIs, databases, or other software systems.
 
-it can learn, adapt and have different levels of autonomy.
+Together, these components allow the agent to learn, adapt, and operate at different levels of autonomy.
 
---- 
+---
 
-## ReAct - The internal Reasoning Loop
+## ReAct — The Internal Reasoning Loop
 
 [The ReAct pattern](https://arxiv.org/abs/2210.03629) describes how an agent operates in an **iterative loop of thought
 **, **action**, and **observation** until an exit condition is met.
@@ -53,15 +52,15 @@ graph TD
     Check -- Yes --> End((End: Task Complete))
 
     %% Styling
-    style ReAct_Loop fill:#f9f9f,stroke:#333,stroke-dasharray: 5 5
-    style External_World fill:#fff4d,stroke:#d4a017,stroke-width:2px
-    style Thought fill:#e1f5f,stroke:#01579b
-    style Action fill:#e8f5e,stroke:#2e7d32
-    style Observation fill:#fff3e,stroke:#ef6c00
-    style ToolEnv fill:#f3e5f,stroke:#7b1fa2,stroke-width:2px
+    style ReAct_Loop fill:#f9f9f9,stroke:#333,stroke-dasharray: 5 5
+    style External_World fill:#fff4dd,stroke:#d4a017,stroke-width:2px
+    style Thought fill:#e1f5fe,stroke:#01579b
+    style Action fill:#e8f5e9,stroke:#2e7d32
+    style Observation fill:#fff3e0,stroke:#ef6c00
+    style ToolEnv fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
 ```
 
-----
+---
 
 ## Deterministic Workflow vs. Dynamic Orchestration
 
@@ -129,8 +128,8 @@ graph TD
     C -->|Done| J[Output Final Answer]
     J --> K[End]
     
-    classDef decision fill:#fff9e,stroke:#ffcc66,stroke-width:2px
-    classDef action fill:#f0f8f,stroke:#3399ff,stroke-width:2px
+    classDef decision fill:#fff9e6,stroke:#ffcc66,stroke-width:2px
+    classDef action fill:#f0f8ff,stroke:#3399ff,stroke-width:2px
     class C decision
     class D,F,H action
 ```

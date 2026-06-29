@@ -31,10 +31,20 @@ from .base import TracingStrategy
 
 log = logging.getLogger("multi_agent_a2a.tracing.phoenix")
 
-# Span name prefixes that carry no observability value.
-# These are EventQueueSource internals: _dispatch_loop, enqueue_event,
-# dequeue_event, task_done — typically dozens of 0ms spans per request.
-_A2A_NOISE_PREFIXES = ("a2a.server.events.",)
+# Span name prefixes that carry no observability value and are safe to drop.
+# Safe = they are leaf spans with no important children (LLM/tool calls).
+#
+# NOT dropped (ancestors of ChatOpenAI spans — dropping would orphan them):
+#   a2a.server.routes.*        — JSON-RPC dispatcher; parent of request_handlers
+#   a2a.client.transports.*    — HTTP transport; parent of server-side spans
+#   a2a.server.request_handlers.* — direct parent of ChatOpenAI spans
+#
+# To remove those without orphaning children a SpanProcessor that rewrites
+# parent_span_id would be needed (not implemented).
+_A2A_NOISE_PREFIXES = (
+    "a2a.server.events.",  # EventQueueSource internals: dozens of 0ms spans per request
+    "a2a.server.tasks.",   # TaskManager internals: leaf spans, no LLM children
+)
 
 
 class _DropA2ANoiseSampler:
@@ -124,7 +134,7 @@ class PhoenixTracingStrategy(TracingStrategy):
         session_id: str | None = None,
     ) -> Callable[..., Coroutine]:
         from opentelemetry import trace as otel_trace
-        from opentelemetry.trace import SpanKind
+        from opentelemetry.trace import SpanKind, StatusCode
         from phoenix.otel import using_session
 
         tracer = otel_trace.get_tracer("multi_agent_a2a.orchestrator")
@@ -135,14 +145,20 @@ class PhoenixTracingStrategy(TracingStrategy):
                     "orchestrator_run", kind=SpanKind.SERVER
                 ) as span:
                     span.set_attribute("openinference.span.kind", "AGENT")
-                    result = await fn(*args, **kwargs)
-                    # Phoenix session view reads input.value / output.value from the
-                    # root span of each trace to populate the HUMAN / AI turn display.
-                    if isinstance(result, dict):
-                        span.set_attribute("input.value",     result.get("query", ""))
-                        span.set_attribute("output.value",    result.get("final_answer", ""))
-                        span.set_attribute("input.mime_type",  "text/plain")
-                        span.set_attribute("output.mime_type", "text/plain")
-                    return result
+                    try:
+                        result = await fn(*args, **kwargs)
+                        # Phoenix session view reads input.value / output.value from the
+                        # root span of each trace to populate the HUMAN / AI turn display.
+                        if isinstance(result, dict):
+                            span.set_attribute("input.value",    result.get("query", ""))
+                            span.set_attribute("output.value",   result.get("final_answer", ""))
+                            span.set_attribute("input.mime_type", "text/plain")
+                            span.set_attribute("output.mime_type", "text/plain")
+                        span.set_status(StatusCode.OK)
+                        return result
+                    except Exception as exc:
+                        from src.otel_utils import record_exception
+                        record_exception(exc)
+                        raise
 
         return _wrapped

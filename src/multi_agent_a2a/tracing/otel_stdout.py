@@ -21,7 +21,7 @@ from opentelemetry.sdk.resources import Resource as OtelResource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 from opentelemetry.sdk.trace.sampling import ALWAYS_ON, TraceIdRatioBased
-from opentelemetry.trace import SpanKind
+from opentelemetry.trace import SpanKind, StatusCode
 
 from .base import TracingStrategy
 
@@ -93,12 +93,18 @@ class OtelStdoutTracingStrategy(TracingStrategy):
                 "orchestrator_run", kind=SpanKind.SERVER
             ) as span:
                 span.set_attribute("openinference.span.kind", "AGENT")
-                result = await fn(*args, **kwargs)
-                if isinstance(result, dict):
-                    span.set_attribute("input.value",     result.get("query", ""))
-                    span.set_attribute("output.value",    result.get("final_answer", ""))
-                    span.set_attribute("input.mime_type",  "text/plain")
-                    span.set_attribute("output.mime_type", "text/plain")
-                return result
+                try:
+                    result = await fn(*args, **kwargs)
+                    if isinstance(result, dict):
+                        span.set_attribute("input.value",     result.get("query", ""))
+                        span.set_attribute("output.value",    result.get("final_answer", ""))
+                        span.set_attribute("input.mime_type",  "text/plain")
+                        span.set_attribute("output.mime_type", "text/plain")
+                    span.set_status(StatusCode.OK)
+                    return result
+                except Exception as exc:
+                    from src.otel_utils import record_exception
+                    record_exception(exc)
+                    raise
 
         return _wrapped

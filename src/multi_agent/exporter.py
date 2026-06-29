@@ -189,6 +189,7 @@ def _uninstrument_langchain() -> None:
 def _build_langfuse(config: MultiAgentConfig) -> ExporterAdapter:
     from langfuse import Langfuse
     _uninstrument_langchain()
+    os.environ.setdefault("OTEL_SERVICE_NAME", config.phoenix_project_name)
     host = os.getenv("LANGFUSE_HOST", "http://localhost:3000")
     client = Langfuse(
         public_key=config.langfuse_public_key or None,

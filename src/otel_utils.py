@@ -29,6 +29,7 @@ def set_token_cost_attributes(input_tokens: int, output_tokens: int, cost_usd: f
     span.set_attribute("gen_ai.usage.output_tokens", output_tokens)
     span.set_attribute("llm.token_count.prompt", input_tokens)
     span.set_attribute("llm.token_count.completion", output_tokens)
+    span.set_attribute("llm.token_count.total", input_tokens + output_tokens)
     span.set_attribute("cost.usd", cost_usd)
 
 

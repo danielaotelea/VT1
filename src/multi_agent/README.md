@@ -77,24 +77,6 @@ Select a tracing exporter from the dropdown. Each response shows inline evaluati
 
 ---
 
-## Observability backends
-
-Start the desired backend before activating its exporter in the UI:
-
-| Exporter | Start command | UI |
-|---|---|---|
-| Langfuse | `bash infra/langfuse/langfuse-run.sh` | http://localhost:3000 |
-| Arize Phoenix | `bash infra/phoenix/phoenix-run.sh` | http://localhost:6006 |
-| Comet Opik | `cd /Users/danielaotelea/Documents/ZHAW/Semester3/VT1/opik && ./opik.sh` | http://localhost:5173 |
-| otel-stdout | — (no service needed) | terminal |
-| none | — | — |
-
-Stop: append `--stop` to the Langfuse and Phoenix scripts; run `./opik.sh --stop` for Opik.
-
-See per-tool setup guides in `infra/`.
-
----
-
 ## Run the tests
 
 ```bash
@@ -109,14 +91,14 @@ All 27 tests inject fake models and run with `exporter="none"` — no API keys r
 
 All options are in `MultiAgentConfig` (`src/multi_agent/config.py`):
 
-| Field | Default | Description |
-|---|---|---|
-| `orchestrator_model` | `"gpt-4o"` | Model for synthesis |
-| `researcher_model` | `"gpt-4o"` | Model for search & summarisation |
+| Field | Default         | Description |
+|---|-----------------|---|
+| `orchestrator_model` | `"gpt-4o"`      | Model for synthesis |
+| `researcher_model` | `"gpt-4o"`      | Model for search & summarisation |
 | `evaluator_model` | `"gpt-4o-mini"` | LLM-as-judge model |
-| `exporter` | `"langwatch"` | Tracing backend |
-| `faithfulness_threshold` | `0.8` | Below → warning span |
-| `low_confidence_threshold` | `0.6` | Below → retry; exhausted → HITL |
-| `max_evaluator_retries` | `2` | Max retries before HITL escalation |
-| `max_identical_tool_calls` | `3` | Loop detection threshold |
-| `max_search_results` | `3` | Max web search results per query |
+| `exporter` | `"langfuse"`    | Tracing backend |
+| `faithfulness_threshold` | `0.8`           | Below → warning span |
+| `low_confidence_threshold` | `0.6`           | Below → retry; exhausted → HITL |
+| `max_evaluator_retries` | `2`             | Max retries before HITL escalation |
+| `max_identical_tool_calls` | `3`             | Loop detection threshold |
+| `max_search_results` | `3`             | Max web search results per query |

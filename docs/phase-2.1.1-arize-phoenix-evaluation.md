@@ -30,8 +30,7 @@ The container persists trace data in a named volume (`phoenix_data`) across rest
 pip install arize-phoenix openinference-instrumentation-langchain
 ```
 
-In the current implementation, the dependencies are managed using requirements.txt in the root of the project.
-The above command is only needed if you want to use Phoenix outside of the project.
+Dependencies are already in the project's `requirements.txt`. This step is only needed to use Phoenix outside this project.
 
 ### 3. Connecting to the agent
 
@@ -56,12 +55,20 @@ def _build_phoenix(config: MultiAgentConfig) -> ExporterAdapter:
     return _PhoenixAdapter()
 ```
 
-The agent calls `phoenix.otel.register()` to create a `TracerProvider` pointed at the
-Docker container's OTLP endpoint, then passes it to `LangChainInstrumentor().instrument()`.
-Every `model.invoke()` and `tool.invoke()` call produces a span automatically — no per-call
-callback is needed.
+The exporter calls `phoenix.otel.register()` to create a `TracerProvider` pointed at the Docker container's OTLP endpoint, then passes it to `LangChainInstrumentor().instrument()`. Every `model.invoke()` and `tool.invoke()` call produces a span automatically — no per-call callback is needed.
 
 ![Phoenix projects overview](img/phoenix-projects.png)
+
+### 4. Configure environment variables
+
+No account or API key is required for local self-hosted Phoenix. The default endpoint `http://localhost:6006` is used automatically. Optionally add to `.env`:
+
+```
+PHOENIX_COLLECTOR_ENDPOINT=http://localhost:6006
+```
+
+The SDK reads `PHOENIX_COLLECTOR_ENDPOINT` at startup. The default already points at the local container, so this step is only needed when running Phoenix on a different host or port.
+
 ### 5. Verifying traces appear
 
 Open http://localhost:6006 and check that a new trace appears under the configured project name after invoking the agent. 
@@ -84,22 +91,36 @@ The trace should contain spans for each LLM and tool call, with attributes set a
 | Area                                    | Dimension                | Status                                                                                                                                                                                                                                                                                                                             | Detail                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 |-----------------------------------------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | OTLP wire protocol                      | Wire                     | ✅ Native                                                                                                                                                                                                                                                                                                                           | Uses OTLP/HTTP `/v1/traces` — fully OTel-standard transport                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| OpenInference span attributes           | Semantic (OpenInference) | ✅ Auto                                                                                                                                                                                                                                                                                                                             | `LangChainInstrumentor` automatically sets `openinference.span.kind`, `llm.model_name`, `llm.token_count.prompt/completion/total`, `input.value`, `output.value`, `llm.input_messages`, `llm.output_messages`. OpenInference is **Arize's own specification** — predates OTel GenAI semconv and uses a different namespace. These attributes are Phoenix-native; an OTLP backend that does not know OpenInference will ingest the spans correctly but display raw attribute names. |
+| OpenInference span attributes           | Semantic (OpenInference) | ✅ Auto                                                                                                                                                                                                                                                                                                                             | `LangChainInstrumentor` automatically sets `openinference.span.kind`, `llm.model_name`, `llm.token_count.prompt/completion/total`, `input.value`, `output.value`, `llm.input_messages`, `llm.output_messages`. OpenInference is an OTel-compatible semantic convention maintained by Arize — it predates OTel GenAI semconv and uses a different namespace. These attributes are Phoenix-native; an OTLP backend that does not know OpenInference will ingest the spans correctly but display raw attribute names. |
 | OTel GenAI semconv (`gen_ai.*`)         | Semantic (OTel GenAI)    | ⚠️ Not supported natively                                                                                                                                                                                                                                                                                                          | Phoenix does not yet have native backend support for parsing `gen_ai.*` attributes without an intermediate mapping processor ([issue #10622](https://github.com/Arize-ai/phoenix/issues/10622) [CITE-PHOENIX-GENAI-ISSUE]). `LangChainInstrumentor` emits OpenInference names (`llm.*`), not `gen_ai.*`, so this gap does not affect this project directly. `set_token_cost_attributes()` does write `gen_ai.usage.input_tokens` / `gen_ai.usage.output_tokens`, but the LLM span is already closed at that point — they land on the parent span and are not consumed by Phoenix. |
 | OTel Resource attributes | Resource | ✅ Set | `resource=Resource(otel_resource_attrs(project))` passed to `register()` (requires `phoenix.otel >= 0.16.0` to import `Resource` from `phoenix.otel`). Phoenix merges it with its own project tag. Resulting resource: `service.name`, `service.version=0.1.0`, `deployment.environment`, `phoenix.project.name`. |
-| `session.id`                            | ✅ Supported              | Set via `phoenix.otel.using_session(session_id)` context manager (consolidated import, requires `>= 0.16.0`) — propagated to all child spans via OTel context propagation, no per-call metadata needed.                                                                                                                            |
-| `cost.usd` span attribute               | ⚠️ Timing issue          | `set_token_cost_attributes()` is called from `CostTracker.record()` after `model.invoke()` returns. The LLM span created by `LangChainInstrumentor` is already closed at that point, so `cost.usd` is written to the parent span (or a no-op span if no parent exists). Cost is not visible on the LLM span in the Phoenix UI.     |
-| Exception recording                     | ⚠️ Partial               | `record_exception(exc)` and `span.set_status(ERROR)` are called in the orchestrator for guard errors (`LoopDetectedError`, `PIIExposureError`) via `src/otel_utils.py`. However, the simple agent's `LoopDetectedError` is not caught before re-raise — it lands on whatever span is active, which may not be the most useful one. |
-| Span events for guard triggers          | ⚠️ Missing               | Internal `TraceEvent` records (loop detected, PII, HITL escalation) are never emitted as OTel span events — guard firings are invisible in Phoenix's trace detail view.                                                                                                                                                            |
-| Sampling rate                           | ✅ Configured             | `OTEL_TRACES_SAMPLER=traceidratio` and `OTEL_TRACES_SAMPLER_ARG=<rate>` set via `os.environ.setdefault()` before `register()` is called. OTel SDK picks these up at TracerProvider construction.                                                                                                                                   |
-| `otel-stdout` LangChain instrumentation | ✅ Fixed                  | `_build_otel_stdout()` calls `LangChainInstrumentor().instrument(tracer_provider=provider)` and passes the full resource. LLM and tool spans appear in stdout with correct resource attributes.                                                                                                                                    |
-| **UI authentication**                   | ⚠️ Disabled by default   | Authentication is off by default — suitable for local development or VPC-isolated deployments. It can be enabled by setting `PHOENIX_ENABLE_AUTH=True` and `PHOENIX_SECRET` (JWT signing key). Once enabled, all UI access and API calls require credentials. See [self-hosting authentication docs](https://arize.com/docs/phoenix/self-hosting/features/authentication). |
-| **API / ingestion auth**                | ⚠️ Disabled by default   | When auth is enabled, two API key types are available: **system keys** (admin-created, used by automated agents and CI pipelines) and **user keys** (self-managed per user). Enabling auth stops all trace ingestion until at least one system key is created — plan for downtime on existing deployments.                          |
-| **SSO / OAuth2 / LDAP**                 | ✅ Available (self-hosted) | When auth is enabled, Phoenix supports **OAuth2 / OpenID Connect** (Google, AWS Cognito, Microsoft Entra ID, Keycloak, any OIDC provider) and **LDAP** (Active Directory, OpenLDAP). Full RBAC is reserved for Arize AX.                                                                                                            |
+| `session.id`                            | Session                  | ✅ Supported              | Set via `phoenix.otel.using_session(session_id)` context manager (consolidated import, requires `>= 0.16.0`) — propagated to all child spans via OTel context propagation, no per-call metadata needed.                                                                                                                            |
+| `cost.usd` span attribute               | Semantic (cost)          | ⚠️ Timing issue          | `set_token_cost_attributes()` is called from `CostTracker.record()` after `model.invoke()` returns. The LLM span created by `LangChainInstrumentor` is already closed at that point, so `cost.usd` is written to the parent span (or a no-op span if no parent exists). Cost is not visible on the LLM span in the Phoenix UI.     |
+| Exception recording                     | OTel Compliance          | ⚠️ Partial               | `record_exception(exc)` and `span.set_status(ERROR)` are called in the orchestrator for guard errors (`LoopDetectedError`, `PIIExposureError`) via `src/otel_utils.py`. However, the simple agent's `LoopDetectedError` is not caught before re-raise — it lands on whatever span is active, which may not be the most useful one. |
+| Span events for guard triggers          | OTel Compliance          | ⚠️ Missing               | Internal `TraceEvent` records (loop detected, PII, HITL escalation) are never emitted as OTel span events — guard firings are invisible in Phoenix's trace detail view.                                                                                                                                                            |
+| Sampling rate                           | OTel Compliance          | ✅ Configured             | `OTEL_TRACES_SAMPLER=traceidratio` and `OTEL_TRACES_SAMPLER_ARG=<rate>` set via `os.environ.setdefault()` before `register()` is called. OTel SDK picks these up at TracerProvider construction.                                                                                                                                   |
+| `otel-stdout` LangChain instrumentation | OTel Compliance          | ✅ Fixed                  | `_build_otel_stdout()` calls `LangChainInstrumentor().instrument(tracer_provider=provider)` and passes the full resource. LLM and tool spans appear in stdout with correct resource attributes.                                                                                                                                    |
+| **UI authentication**                   | Security                 | ⚠️ Disabled by default   | Authentication is off by default — suitable for local development or VPC-isolated deployments. It can be enabled by setting `PHOENIX_ENABLE_AUTH=True` and `PHOENIX_SECRET` (JWT signing key). Once enabled, all UI access and API calls require credentials. See [self-hosting authentication docs](https://arize.com/docs/phoenix/self-hosting/features/authentication). |
+| **API / ingestion auth**                | Security                 | ⚠️ Disabled by default   | When auth is enabled, two API key types are available: **system keys** (admin-created, used by automated agents and CI pipelines) and **user keys** (self-managed per user). Enabling auth stops all trace ingestion until at least one system key is created — plan for downtime on existing deployments.                          |
+| **SSO / OAuth2 / LDAP**                 | Security                 | ✅ Available (self-hosted) | When auth is enabled, Phoenix supports **OAuth2 / OpenID Connect** (Google, AWS Cognito, Microsoft Entra ID, Keycloak, any OIDC provider) and **LDAP** (Active Directory, OpenLDAP). Full RBAC is reserved for Arize AX.                                                                                                            |
 
 ---
 
 ## Three-pillar evaluation
+
+> **Evaluation scope and methodology**
+>
+> This evaluation is based on two experiment runs conducted in this project:
+> - **Round 1** — simple agent, 5 arithmetic queries, session `round1-phoenix-001`
+> - **Round 2** — multi-agent v1, 5 research queries, session `round2-phoenix-001`; A2A v2, 5 queries, session `a2a-phoenix-002`
+>
+> **Environment:** Phoenix `arizephoenix/phoenix:latest` on Docker (SQLite backend), `openinference-instrumentation-langchain` for auto-instrumentation, `python-phoenix-otel` SDK, macOS local development machine.
+>
+> **What was measured automatically:** latency, token counts, and cost from the structured JSON output of the experiment runners (`experiments/*/runs/*.json`).
+>
+> **What was observed manually:** UI behaviour (session grouping, span detail views, metrics charts), span attribute rendering, and cross-process trace correlation. These observations are specific to this environment and tool version; they are not guaranteed to generalise across deployments, Phoenix versions, or agent frameworks.
+>
+> **Out of scope:** cloud deployment, PostgreSQL backend, RBAC/SSO configuration, Phoenix Evaluators (LLM-as-judge via API), Prompt Playground, Datasets API, and annotation workflows. No load testing or multi-user concurrency testing was performed.
 
 ### Community assessment (external perspective)
 
@@ -127,15 +148,15 @@ Source: Paul, K. (2026). *Top 5 LLM Observability Platforms for 2026*. Maxim AI.
 
 **Setup friction — minimal.** Phoenix requires two steps: start the Docker container (`docker compose up`) and install the SDK. No account, no API key, no additional environment variables — the default endpoint `http://localhost:6006` is used out of the box. The only project-level configuration needed is the `project_name` argument passed to `phoenix_register()`, which maps to a named project in the UI.
 
-**Zero per-call instrumentation.** `LangChainInstrumentor().instrument(tracer_provider=provider)` is called once at exporter initialisation. Every subsequent `model.invoke()` and `tool.invoke()` call is instrumented automatically — no callbacks, no decorators, no per-call metadata injection needed. This is the main advantage over callback-based approaches like Langfuse and Opik, which require per-call configuration.
+**Zero per-call instrumentation.** `LangChainInstrumentor().instrument(tracer_provider=provider)` is called once at exporter initialisation. Every subsequent `model.invoke()` and `tool.invoke()` call is instrumented automatically — no callbacks, no decorators, no per-call metadata injection needed. In this project, this eliminated the per-call callback configuration that the Langfuse and Opik integrations required.
 
-**OTLP native transport.** Spans are sent via standard OTLP/HTTP to `/v1/traces`. This is the only tool in this evaluation that accepts raw OTel spans directly — Langfuse and Opik each require their own SDK-level instrumentation format. This means the same spans produced by `LangChainInstrumentor` can be forwarded to any other OTLP-compatible backend without changing any code.
+**OTLP native transport.** Spans are sent via standard OTLP/HTTP to `/v1/traces`. In this evaluation, Phoenix was the only tool configured to ingest raw OTel spans directly over OTLP; Langfuse and Opik were integrated via their respective SDK callback mechanisms (see the comparison document for the OTLP endpoint status of each tool). The spans produced by `LangChainInstrumentor` can be forwarded to any other OTLP-compatible backend without code changes.
 
 **Sampling rate.** Configured via two environment variables set before `TracerProvider` construction: `OTEL_TRACES_SAMPLER=traceidratio` and `OTEL_TRACES_SAMPLER_ARG=<rate>`. The OTel SDK picks these up at init time. Sampling is consistent across all child spans within a trace.
 
 **Project separation.** Each agent variant (`vt1-simple-agent`, `vt1-multi-agent`, `vt1-a2a`) sends to a separate named project via the `project_name` parameter. Projects are isolated in the UI — no cross-contamination of traces across experiments.
 
-**Cross-process instrumentation (A2A v2) — no Phoenix-specific code required on sub-agents.** In the A2A distributed system, `protocol.call_agent()` injects the active OTel span context and `session.id` (promoted into W3C Baggage) into outgoing HTTP headers before each inter-service call. On the receiving side, `OTelContextMiddleware` extracts the context with standard OTel `extract(headers)` and calls `using_session()` with the session ID — so spans from the researcher and evaluator services appear as children of the orchestrator span. Because Phoenix accepts raw OTLP, this required no Phoenix-specific client code on the sub-agent services: standard W3C `traceparent` propagation was sufficient. In contrast, Langfuse and Opik require tool-specific headers (`opik_trace_id`, `opik_parent_span_id`) and SDK-specific objects on the receiving side to achieve the same result.
+**Cross-process instrumentation (A2A v2).** `protocol.call_agent()` injects the active OTel context and `session.id` (promoted into W3C Baggage) into outgoing HTTP headers. On the receiving side, `OTelContextMiddleware` extracts the context via standard OTel `extract(headers)` and calls `using_session()` — so sub-agent spans appear as children of the orchestrator span. No Phoenix-specific code is needed on the sub-agents: W3C `traceparent` propagation is enough. In this project, the Langfuse and Opik integrations required tool-specific headers and SDK callbacks on each service to achieve the same result.
 
 ### Pillar 2: Capabilities (the "What")
 
@@ -655,15 +676,15 @@ The full raw payload for this span is below.
 | Performance overhead | Ingestion latency and impact on the agent's end-to-end response time | Near real-time ingestion — no observable latency impact on agent runs observed across all experiment sessions |
 | Resource usage | Hardware requirements (PostgreSQL, ClickHouse, SQLite) | **SQLite** (default, used in this project) — zero setup, stores data in `~/.phoenix/`; suitable for local development and single-user deployments. For production and multi-user deployments, **PostgreSQL** is recommended: set `PHOENIX_SQL_DATABASE_URL` to switch backends. PostgreSQL enables concurrent access, standard backup tooling, and replication. See [self-hosting architecture docs](https://arize.com/docs/phoenix/self-hosting/architecture). |
 
-* Observations from the experiments:
+**Observations from this evaluation's experiment runs (local Docker, macOS, SQLite backend):**
 
-**Ingestion latency.** Spans appear in the Phoenix UI near real-time during a run. There is no observable delay between a query completing and its trace becoming visible in the Spans or Traces tab — useful for live debugging during development.
+**Ingestion latency.** In all experiment sessions, spans appeared in the Phoenix UI near real-time during a run, with no observable delay between query completion and trace visibility in the Spans or Traces tab.
 
-**UI responsiveness.** The interface remained responsive throughout all experiment runs, including the A2A v2 sessions where each trace contains 30–50 spans across three processes. No slowdowns were observed when navigating between the Spans, Traces, Sessions, and Metrics tabs under that load.
+**UI responsiveness.** The interface remained responsive throughout all runs, including A2A v2 sessions where each trace contained 30–50 spans across three processes. No slowdowns were observed when navigating between the Spans, Traces, Sessions, and Metrics tabs at that scale.
 
-**Data persistence.** No data loss was observed after stopping and restarting the Docker container. Traces from all experiment sessions were still accessible after container restarts, confirming that Phoenix persists its SQLite store across restarts by default.
+**Data persistence.** No data loss was observed after stopping and restarting the Docker container across all sessions. Traces persisted in the SQLite-backed named volume (`phoenix_data`) across restarts.
 
-**UX limitation — time filter scope.** The time-range filter (e.g. "Last 15 Min") applies globally across all projects and all tabs, not just the current project view. Setting a filter from within a specific project screen still affects the global state. This can cause confusion when switching between projects with different experiment timestamps — traces appear to be missing until the filter is widened manually.
+**UX limitation — time filter scope.** Observed in this environment: the time-range filter (e.g. "Last 15 Min") applies globally across all projects and all tabs. Setting it from within one project affects other projects, which caused confusion when switching between projects with different experiment timestamps.
 
 ---
 
@@ -684,11 +705,11 @@ The simple agent ran 5 arithmetic queries of increasing complexity (1 to 3 tool 
 
 **Latency scales with tool call count.** Q1 (single tool call) completed in 1 269 ms; Q5 (three tool calls) took 2 250 ms. This reflects the extra LLM round-trips needed to process each tool result and decide the next step. Input token counts also grow across queries as the conversation history accumulates in the prompt.
 
-**Trace view shows the full ReAct loop.** Each query produces a trace with the correct span structure: `ChatOpenAI` (llm) → `multiply` or `divide` (tool) → `ChatOpenAI` (llm) → final answer. For Q5 with three tool calls, three `ChatOpenAI` spans appear in sequence. Screenshots of the trace view and sessions tab are shown in Pillar 2 above (points 1 and 3 under "Where OpenInference attributes surface").
+**Trace view shows the full ReAct loop.** In this run, each query produced a trace with the expected span structure: `ChatOpenAI` (llm) → `multiply` or `divide` (tool) → `ChatOpenAI` (llm) → final answer. For Q5 with three tool calls, three `ChatOpenAI` spans appeared in sequence.
 
-**Session grouping works.** All 5 traces are grouped under session `round1-phoenix-001` in the Sessions tab, showing aggregate token counts and cost for the full run.
+**Session grouping worked.** All 5 traces were grouped under session `round1-phoenix-001` in the Sessions tab, showing aggregate token counts and cost for the full run.
 
-**Zero errors, no data loss.** All outputs matched expected values; no spans were dropped or missing.
+**Zero errors, no data loss.** All outputs matched expected values; no spans were dropped or missing in this run.
 
 ![Metrics dashboard for vt1-simple-agent — 29 traces, $0.01 total cost, P50 latency 602ms, 0 errors](../experiments/simple_agent/runs/screenshots/phoenix/round1-phoenix-001-dashboard-1.png)
 
@@ -738,9 +759,9 @@ Key attributes visible on the span:
 
 Q3 (comparative — Phoenix vs Langfuse) triggered 3 retries + HITL escalation with faithfulness = 0.0. This is expected: the model's own training data about itself is not grounded in the retrieved sources, causing the evaluator to flag it as hallucinated on every retry.
 
-**Span hierarchy — visible and correct.** The Spans list shows the full multi-agent pipeline as a tree: `LangGraph` (chain, root) → `research` (chain) → `ChatOpenAI` (llm) → `evaluate` (chain) → `ChatOpenAI` (llm) → `_route_after_evaluation` (chain) → `synthesize` (chain) → `ChatOpenAI` (llm). Each node role maps to a named chain span; each LLM call is a child `llm` span with token counts and cost.
+**Span hierarchy — visible and correct.** In this run, the Spans list showed the full multi-agent pipeline as a tree: `LangGraph` (chain, root) → `research` (chain) → `ChatOpenAI` (llm) → `evaluate` (chain) → `ChatOpenAI` (llm) → `_route_after_evaluation` (chain) → `synthesize` (chain) → `ChatOpenAI` (llm). Each node role mapped to a named chain span; each LLM call appeared as a child `llm` span with token counts and cost.
 
-**Session grouping works.** Session `round2-phoenix-001` groups all 5 query traces with aggregate totals: 5 traces, 19 112 tokens, $0.06, p50 latency 7.4s.
+**Session grouping worked.** Session `round2-phoenix-001` grouped all 5 query traces with aggregate totals: 5 traces, 19 112 tokens, $0.06, p50 latency 7.4s.
 
 **Input/output on root span shows full AgentState.** The `LangGraph` root span's input captures the entire `AgentState` dict — including `messages`, `trace_events`, `research`, `evaluation`, `retry_count` fields — not just the query string. This is Phoenix capturing LangGraph's internal state handoff, which provides full execution context but makes the input field verbose.
 
@@ -764,13 +785,13 @@ Q3 (comparative — Phoenix vs Langfuse) triggered 3 retries + HITL escalation w
 | Total cost | $0.0737 |
 | Errors | 0 |
 
-**Cross-process span correlation works.** Each `orchestrator_run` span contains child spans from the researcher and evaluator processes (`a2a.server.request_handlers.*` → `ChatOpenAI`), connected via the W3C `traceparent` header injected by `protocol.call_agent()`. All 5 queries produced a single unified trace per query, not three separate traces.
+**Cross-process span correlation worked.** In this run, each `orchestrator_run` span contained child spans from the researcher and evaluator processes (`a2a.server.request_handlers.*` → `ChatOpenAI`), connected via the W3C `traceparent` header injected by `protocol.call_agent()`. All 5 queries produced a single unified trace per query, not three separate traces.
 
-**Root span status: OK.** The `orchestrator_run` root span shows `✅ OK` status, confirming that `StatusCode.OK` is set on successful completion.
+**Root span status: OK.** The `orchestrator_run` root span showed `✅ OK` status in the UI, confirming that `StatusCode.OK` is set on successful completion.
 
-**A2A SDK infrastructure spans visible.** The trace tree includes `a2a.client.transports.*` and `a2a.server.routes.*` spans from the A2A SDK between the orchestrator and the service-side LLM calls. These cannot be safely dropped without orphaning the `ChatOpenAI` children (see Known Limitations — A2A span nesting).
+**A2A SDK infrastructure spans visible.** The trace tree included `a2a.client.transports.*` and `a2a.server.routes.*` spans from the A2A SDK. These cannot be safely dropped without orphaning the `ChatOpenAI` children (see Known Limitations — A2A span nesting).
 
-**Session grouping works.** The Sessions tab for project `vt1-a2a` shows exactly 5 sessions for the 5 queries, each containing the full cross-process trace.
+**Session grouping worked.** The Sessions tab for project `vt1-a2a` showed exactly 5 sessions for the 5 queries in this run, each containing the full cross-process trace.
 
 **Guard events.** `guards_fired: ["low_faithfulness", "low_confidence"]` recorded in the JSON result, 1 retry triggered. Guard events are not emitted as OTel span events (same limitation as v1).
 

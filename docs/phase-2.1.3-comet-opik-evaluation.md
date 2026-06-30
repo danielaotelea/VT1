@@ -3,8 +3,7 @@
 ## Overview
 
 Comet Opik is an open-source LLM observability platform. It can be self-hosted locally via
-Docker Compose with no account or API key required. The SDK integrates with LangChain via
-an `OpikTracer` callback.
+Docker Compose. The SDK integrates with LangChain via an `OpikTracer` callback.
 
 **Key documentation references:**
 
@@ -146,11 +145,33 @@ Open http://localhost:5173 → **Projects** → `vt1-simple-agent` (or `vt1-mult
 - No built-in PII/data masking in the self-hosted OSS version
 - OTLP/LangChain auto-instrumentation path is less documented than the callback approach
 
-> **Note:** The "complex self-hosted footprint" observation is confirmed by the deployment: `./opik.sh` starts 8 containers by default. The "no API key for local" strength is confirmed — `OPIK_URL_OVERRIDE` and `OPIK_PROJECT_NAME` are sufficient.
+> **Note:** The "complex footprint" observation is confirmed: `./opik.sh` starts 8 containers. The "no API key for local" strength is confirmed — `OPIK_URL_OVERRIDE` and `OPIK_PROJECT_NAME` are sufficient.
 
 ---
 
 ### Pillar 1: Integration and Instrumentation Capabilities (The "How")
+
+#### Implementation scope: native SDK vs. OTel-native path
+
+Opik supports two distinct instrumentation paths. **This project uses the native SDK path exclusively.**
+
+The initial integration was built using Opik's `OpikTracer` callback SDK approach, which was the primary supported and documented method at the time of development. Opik's native OTLP endpoint (`/api/v1/private/otel/v1/traces`) was evaluated later in the development cycle. To maintain system stability, migrating the established callback architecture to an OTel-native pipeline is recorded as a proposed future improvement rather than applied as a current implementation change.
+
+| Dimension | Native SDK path *(used in this project)* | OTel-native path *(not used)* |
+|---|---|---|
+| Instrumentation mechanism | `OpikTracer` injected per `model.invoke()` call | `OpenAIInstrumentor` or custom `LangChainInstrumentor` + OTLP to `/api/v1/private/otel/v1/traces` |
+| Missed calls | Any `model.invoke()` without explicit tracer is invisible | None — auto-instrumentation patches calls globally |
+| Sampling | Not supported; all traces always sent | Supported via `OTEL_TRACES_SAMPLER` |
+| Attribute schema | Opik tool-specific schema | OpenInference or OTel GenAI semconv |
+| Session propagation | `OpikTracer(thread_id=...)` per-call | W3C Baggage + `BaggageSpanProcessor` |
+| A2A context propagation | Opik-specific `opik_trace_id` / `opik_parent_span_id` headers | Standard W3C `traceparent` — interoperable with any OTel-aware service |
+| Auth for local self-hosted | No auth required | 3 headers required (`Authorization`, `projectName`, `Comet-Workspace`) |
+
+**Note:** unlike Langfuse's OTLP path (where `LangChainInstrumentor` + OTLP is explicitly documented), Opik's OTel integration docs demonstrate OpenAI instrumentation only. A LangChain + OTLP path would require custom `TracerProvider` configuration and is not directly documented by Opik at the time of this evaluation.
+
+**Evaluation scope acknowledgment.** The limitations above — no global auto-instrumentation, per-call injection, no sampling, no OpenInference attributes, Opik-specific A2A propagation — reflect the SDK path chosen for this project, not fundamental platform constraints. Opik supports OTel-native instrumentation.
+
+---
 
 | Evaluation category | Criteria | Comet Opik |
 |---|---|---|
@@ -159,7 +180,7 @@ Open http://localhost:5173 → **Projects** → `vt1-simple-agent` (or `vt1-mult
 | Auto-instrumentation | Ability to capture agent spans, tool calls, and model parameters without manual decorators on every call | ❌ **No global auto-instrumentation.** `LangChainInstrumentor` is explicitly removed (`_uninstrument_langchain()`) to avoid OTel interference. Every `model.invoke()` must pass `RunnableConfig(callbacks=[tracer])` explicitly. If a call is made without the tracer, it produces no trace entry. |
 | Data exporters | API/SDK access, JSON/CSV exports | ✅ REST API (`/api/v1/traces`, `/api/v1/spans`), Python SDK helpers, CSV export from the UI. Slack, PagerDuty, and generic webhook notifications available on Cloud; self-hosted availability unconfirmed. |
 
-**Setup friction — lowest of the three.** Opik self-hosted requires no account registration and no API key. Setting `OPIK_URL_OVERRIDE` and `OPIK_PROJECT_NAME` in `.env` is sufficient. `opik.configure(use_local=True)` reads these at import time. There is no `auth_check()` call — a misconfigured URL fails silently with spans dropped rather than raising at initialisation time. This is a meaningful advantage in a research or evaluation environment where quick iteration matters.
+**Setup friction — lowest of the three.** Setting `OPIK_URL_OVERRIDE` and `OPIK_PROJECT_NAME` in `.env` is sufficient; `opik.configure(use_local=True)` reads these at import time. There is no `auth_check()` call — a wrong URL silently drops spans instead of raising an error at startup.
 
 **`OpikTracer` callback — per-call injection required.** Like Langfuse's `CallbackHandler`, `OpikTracer` is injected per `model.invoke()` call. A new instance is created for each call via `_OpikAdapter.callback()`:
 
@@ -200,31 +221,9 @@ async def _tracked(*args, **kwargs):
 
 With an active span in scope, `opik_context.get_distributed_trace_headers()` returns valid `opik_trace_id` and `opik_parent_span_id` headers when LangGraph routing nodes make outgoing A2A calls. Sub-agents receive these via `OTelContextMiddleware` and pass them to `OpikTracer(distributed_headers=...)`, which links their LLM spans as children of the orchestrator's root trace. The A2A experiment confirms this works: 5 traces (one per query), all sub-agent ChatOpenAI spans nested under `a2a_orchestrator_run` in one span tree.
 
-This mechanism requires Opik-specific headers rather than standard W3C `traceparent`. A sub-agent using a different backend would not receive or interpret `opik_trace_id`/`opik_parent_span_id`.
+This uses Opik-specific headers, not standard W3C `traceparent`. A sub-agent on a different backend would not interpret these headers.
 
 **No resource attributes.** Opik has no OTel Resource concept. No `service.name`, `telemetry.sdk.*`, or environment attribute is attached to traces. In the A2A setup, orchestrator, researcher, and evaluator are distinguished by separate Opik projects and by span metadata fields — not by resource-level attributes.
-
----
-
-#### Implementation scope: native SDK vs. OTel-native path
-
-Opik supports two distinct instrumentation paths. **This project uses the native SDK path exclusively.**
-
-The initial integration was built using Opik's `OpikTracer` callback SDK approach, which was the primary supported and documented method at the time of development. Opik's native OTLP endpoint (`/api/v1/private/otel/v1/traces`) was evaluated later in the development cycle. To maintain system stability, migrating the established callback architecture to an OTel-native pipeline is recorded as a proposed future improvement rather than applied as a current implementation change.
-
-| Dimension | Native SDK path *(used in this project)* | OTel-native path *(not used)* |
-|---|---|---|
-| Instrumentation mechanism | `OpikTracer` injected per `model.invoke()` call | `OpenAIInstrumentor` or custom `LangChainInstrumentor` + OTLP to `/api/v1/private/otel/v1/traces` |
-| Missed calls | Any `model.invoke()` without explicit tracer is invisible | None — auto-instrumentation patches calls globally |
-| Sampling | Not supported; all traces always sent | Supported via `OTEL_TRACES_SAMPLER` |
-| Attribute schema | Opik-proprietary | OpenInference or OTel GenAI semconv |
-| Session propagation | `OpikTracer(thread_id=...)` per-call | W3C Baggage + `BaggageSpanProcessor` |
-| A2A context propagation | Opik-specific `opik_trace_id` / `opik_parent_span_id` headers | Standard W3C `traceparent` — interoperable with any OTel-aware service |
-| Auth for local self-hosted | No auth required | 3 headers required (`Authorization`, `projectName`, `Comet-Workspace`) |
-
-**Note:** unlike Langfuse's OTLP path (where `LangChainInstrumentor` + OTLP is explicitly documented), Opik's OTel integration docs demonstrate OpenAI instrumentation only. A LangChain + OTLP path would require custom `TracerProvider` configuration and is not directly documented by Opik at the time of this evaluation.
-
-**Evaluation scope acknowledgment.** The limitations documented in the Known Limitations table and throughout this evaluation — no global auto-instrumentation, per-call injection required, no sampling, no OpenInference attributes, Opik-specific A2A propagation — are consequences of the native SDK implementation path, **not inherent limitations of Opik as a platform**. Opik supports OTel-native instrumentation; the constraints described here reflect the project's current integration approach. The evaluation results in Rounds 1 and 2 should be read with this scope in mind.
 
 ---
 
@@ -276,11 +275,11 @@ Opik computes an **estimated cost** server-side and displays it per trace and in
 
 #### Session and thread grouping
 
-Sessions are grouped in the **Threads** tab by the `thread_id` passed to each `OpikTracer` instance. The thread detail panel shows: total messages, total duration, total cost, and the full input/output of every message in the session scrollable in the right panel — including the model response, token usage breakdown, and `response_metadata` (model name, `system_fingerprint`, `finish_reason`).
+The **Threads** tab groups all traces from a session by `thread_id` (see Pillar 1 for the grouping mechanism). The thread detail panel shows: total messages, total duration, total cost, and the full input/output of every message — including the model response, token usage breakdown, and `response_metadata` (model name, `system_fingerprint`, `finish_reason`).
 
 ![Opik Threads tab — session detail panel showing 26 messages, 11.2s, full conversation with token usage breakdown per message](../experiments/simple_agent/runs/screenshots/opik/round1-opik-001-threads.png)
 
-Unlike Phoenix's Sessions view (aggregated latency columns) and Langfuse's Sessions view (observation list), Opik's Threads panel renders the conversation as a chat-style message list — making it easier to follow the agent's reasoning sequence without navigating to individual traces.
+In this evaluation, Opik's Threads panel rendered the conversation as a chat-style message list, making it easy to follow the agent's reasoning sequence without navigating to individual traces.
 
 ---
 
@@ -302,9 +301,9 @@ The A2A experiment confirms this: Q3's HITL trace shows `hitl_required: true` an
 
 #### Cross-process trace correlation (A2A v2)
 
-In the A2A v2 distributed system, the `_OpikAdapter.tracked()` wrapper creates a root `a2a_orchestrator_run` span for the entire orchestrator execution. The `opik_trace_id` and `opik_parent_span_id` headers extracted from `opik_context.get_distributed_trace_headers()` are propagated to sub-agent services via `OTelContextMiddleware`. Sub-agent `OpikTracer(distributed_headers=...)` instances link their spans as children of the orchestrator trace.
+Cross-process span linking is implemented via `_OpikAdapter.tracked()` — see Pillar 1 for the full mechanism.
 
-**Result:** 5 traces (one per query), each containing the full span tree — orchestrator `a2a_orchestrator_run` root, inner `a2a_orchestrator_run` scope, and all `ChatOpenAI` LLM calls from orchestrator, researcher, and evaluator nested as children. This is structurally equivalent to Phoenix's single-root-trace model and is a significant advantage over Langfuse's 19 separate traces for the same A2A session.
+**In this run:** 5 traces (one per query), each containing the full span tree — orchestrator `a2a_orchestrator_run` root and all `ChatOpenAI` LLM calls from orchestrator, researcher, and evaluator nested as children.
 
 ![A2A Traces list — 5 traces (one per query), filtered by Thread ID a2a-opik-001, with per-trace query input, duration, tokens, and estimated cost](../experiments/multi_agent_a2a/runs/screenshots/opik/a2a-opik-001-traces.png)
 
@@ -324,7 +323,7 @@ The Traces tab provides a filter bar with structured dimensions:
 | Metadata | Any key in the span metadata (e.g., `langgraph_node`, `hitl_required`) |
 | With errors | Filter to error-flagged traces only |
 
-The metadata filter is particularly powerful in Opik: because `langgraph_node` is present in span metadata, filtering by `langgraph_node: synthesize` returns only synthesise-step traces. This is not possible in Langfuse where the node name is absent from filterable metadata.
+The metadata filter is particularly useful: because `langgraph_node` is present in span metadata (see Observation metadata payload), filtering by `langgraph_node: synthesize` returns only synthesise-step traces directly from the Traces list.
 
 ---
 
@@ -377,11 +376,11 @@ The `langgraph_node` field is the key metadata differentiator from Langfuse. All
 | License | Distinguish between MIT/Apache 2.0 and open-core | **Apache 2.0** — same as Phoenix. The full self-hosted version is free with no feature restrictions or enterprise key. [Comet Cloud](https://www.comet.com/site/pricing/) offers free, Team, and Enterprise tiers. |
 | Deployment model | Local/Docker support vs. cloud SaaS only | **`./opik.sh`** (self-hosted, used in this project) — starts 8 containers by default (backend, python-backend, frontend, mysql, clickhouse, zookeeper, redis, minio). First startup downloads images, runs DB migrations. No project/API key setup required — project name set via env var, traces appear immediately. No single-binary CLI; Kubernetes-native design is the recommended production path. |
 | Performance overhead | Ingestion latency and impact on agent end-to-end response time | **Batch async ingestion** — `OpikTracer` batches spans and POSTs them asynchronously to the backend. No observable impact on agent latency. A short delay (1–3 s) before traces appear in the UI is consistent with the Langfuse async pipeline. |
-| Resource usage | Hardware requirements | **Highest default footprint of the three tools.** Eight containers run at all times: two application backends (Java + Python), Nginx frontend, MySQL, ClickHouse, ZooKeeper (ClickHouse coordination), Redis, and MinIO. This exceeds Langfuse (6 containers) and far exceeds Phoenix (1 container). The Kubernetes-native architecture scales well for production volumes but is over-provisioned for a local evaluation environment. Cold start on first launch is the longest of the three tools. |
+| Resource usage | Hardware requirements | **Highest default footprint in this evaluation.** The eight containers listed in the Local Installation section exceeded the Langfuse (6 containers) and Phoenix (1 container) deployments. Cold start on first launch was the longest of the three tools. |
 
 **Observations from experiment sessions:**
 
-**No API key friction.** Traces began arriving immediately after setting two env vars and starting `./opik.sh` — no project creation UI step was required unlike Langfuse. This makes the Opik setup the fastest to get from zero to first trace in a local environment.
+**First trace.** Traces began arriving immediately after setting two env vars and starting `./opik.sh` — no project creation UI step was required.
 
 **Estimated cost in dashboard.** The Project Overview dashboard shows a "Total estimated cost sum" computed server-side. This is displayed prominently alongside trace count, error count, and latency percentiles — making cost visible without any additional configuration.
 
@@ -424,7 +423,7 @@ The simple agent ran 5 arithmetic queries of increasing complexity (1 to 3 tool 
 
 ![Opik Project Overview dashboard — total trace count 16, P50 0.8s, P99 1.5s, estimated cost $0.01, trace volume and duration time-series](../experiments/simple_agent/runs/screenshots/opik/round1-opik-001-dashboard.png)
 
-**No feedback scores.** The Feedback scores tab on every trace is empty — confirming that the simple agent run produces no Opik score objects. The EvaluatorAgent is not part of the simple agent pipeline, so this is expected.
+**No feedback scores.** The Feedback scores tab on every trace is empty — expected, as the EvaluatorAgent is not part of the simple agent pipeline (see Pillar 2 for the integration gap).
 
 ---
 
@@ -448,9 +447,9 @@ Data sources: `experiments/multi_agent/runs/round2-opik-001.json` and `experimen
 
 Q3 (comparative — Phoenix vs Langfuse) triggered 3 retries and HITL escalation with faithfulness = 0.0 on every attempt — identical to Phoenix and Langfuse round 2 results. The model's own training data about itself is not grounded in the retrieved web sources.
 
-**Trace structure — one trace per LangGraph node, not one per query.** Without the `@opik.track` wrapper present in the v1 in-process path, each node's `model.invoke()` creates a separate Opik trace. A 5-query run with no retries produces 15 traces (5 × 3 nodes). Q3's 3 retry cycles bring its node count to 7 (3 research + 3 evaluate + 1 synthesize) for a session total of 19 traces — identical to the Langfuse v1 structure.
+**Trace structure — one trace per LangGraph node, not one per query.** Without the `@opik.track` wrapper, each node's `model.invoke()` creates its own trace. A 5-query run with no retries produces 15 traces (5 × 3 nodes). Q3's 3 retries brought the total to 19 — the same as the Langfuse v1 structure.
 
-**LangGraph node names visible in metadata.** Unlike Langfuse, Opik captures `langgraph_node` in span metadata automatically. The metadata payload for a synthesise-node span includes:
+**LangGraph node names visible in metadata.** `langgraph_node` is captured automatically in span metadata (see Observation metadata payload in Pillar 2). The metadata payload for a synthesise-node span includes:
 
 ```yaml
 provider: openai

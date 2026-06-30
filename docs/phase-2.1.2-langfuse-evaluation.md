@@ -67,7 +67,7 @@ LANGFUSE_HOST=http://localhost:3000
 pip install langfuse
 ```
 
-In the current implementation, the dependencies are managed using `requirements.txt` in the root of the project. The above command is only needed if you want to use Langfuse outside of the project.
+Dependencies are already in the project's `requirements.txt`. This step is only needed to use Langfuse outside this project.
 
 ### 5. Connecting to the agent
 
@@ -107,7 +107,7 @@ see one trace per `agent.invoke()` call with the full span tree visible on click
 | **UI authentication** | Security | ✅ Built-in | Email/Password login out of the box. OAuth social logins (Google, GitHub, Microsoft/Azure AD) included in the free self-hosted version via Auth.js. |
 | **API / ingestion auth** | Security | ✅ API keys | Project-scoped public/secret key pairs created in the UI. Required by all SDK calls. |
 | **SSO / RBAC** | Security | ⚠️ Paid | Enterprise SSO (Okta, SAML, automated workspace syncing) requires a paid plan. Free tier covers social logins only. |
-| **PII / data masking** | Security | ✅ Built-in | Native masking for PCI DSS and GDPR-sensitive fields in the ingestion pipeline — not available in Phoenix or Opik (self-hosted). |
+| **PII / data masking** | Security | ✅ Built-in | Personal-data masking controls (masking, deletion, and retention policies) documented for the self-hosted version — not available in Phoenix or Opik (self-hosted). See https://github.com/orgs/langfuse/discussions/9264 |
 | Token/cost span attributes | Semantic (cost) | ⚠️ Partial | Langfuse captures token counts from LangChain's `LLMResult` callback automatically (visible as `usage` on LLM spans). However, custom `cost.usd` from `CostTracker` is not attached. |
 | Sampling rate | OTel Compliance | ⚠️ Unused | No sampler concept in the Langfuse SDK. `AgentConfig.sampling_rate` has no effect — all traces are always sent. |
 | Span kind (`AGENT`, `TOOL`, `CHAIN`) | Semantic (OTel) | ⚠️ Implicit | Langfuse infers span types from LangChain callback event types, not from explicit OTel `openinference.span.kind` attributes. The hierarchy is correct but not OTel-attributable. |
@@ -133,7 +133,7 @@ Source: Paul, K. (2026). *Top 5 LLM Observability Platforms for 2026*. Maxim AI.
 - Self-hosting requires infrastructure management overhead
 - Evaluation runs separate from observability, requiring context switching
 
-> **Note:** The "evaluation separate from observability" limitation is directly observable in this project: Langfuse's scoring/evaluation UI is a distinct workflow from the trace view. The infrastructure overhead observation aligns with the 6-container Docker Compose setup (langfuse-web, langfuse-worker, postgres, clickhouse, redis, minio) described in the Local Installation section above. The "no LLM proxy" strength is confirmed — the SDK uses callback-based instrumentation with no man-in-the-middle layer.
+> **Note:** The "evaluation separate from observability" limitation is confirmed: Langfuse's scoring UI is a distinct workflow from the trace view. The 6-container setup confirms the infrastructure overhead claim. The "no LLM proxy" strength is confirmed — the SDK uses callbacks with no man-in-the-middle layer.
 
 ### Pillar 1: Integration and Instrumentation Capabilities (The "How")
 
@@ -188,7 +188,7 @@ All `model.invoke()` calls made inside this context are grouped under the same s
 3. On the sub-agent side, `incoming_context()` extracts `x-langfuse-trace-id` and enters `propagate_attributes(session_id=...)` so all LangChain observations in that request inherit the session.
 4. `get_callback()` creates `CallbackHandler(trace_context=TraceContext(trace_id=...))` — this tells the SDK to attach the sub-agent's observations as children of the orchestrator's root trace, not as a new standalone trace.
 
-This is a Langfuse-specific propagation mechanism, unlike Phoenix which relies entirely on standard W3C `traceparent` headers. The approach works but requires both sides to be Langfuse-aware — a sub-agent using a different backend would not receive or interpret `x-langfuse-trace-id`.
+This is Langfuse-specific, unlike Phoenix which uses standard W3C `traceparent`. Both sides must be Langfuse-aware — a sub-agent on a different backend would not interpret `x-langfuse-trace-id`.
 
 ---
 
@@ -207,7 +207,7 @@ The initial integration was built using Langfuse's standard `CallbackHandler` SD
 | Session propagation | `langfuse.propagate_attributes(session_id=...)` — Langfuse-specific | W3C Baggage + `BaggageSpanProcessor` — same mechanism as Phoenix |
 | A2A context propagation | Custom `x-langfuse-trace-id` header (Langfuse-specific) | Standard W3C `traceparent` — interoperable with any OTel-aware service |
 
-**Evaluation scope acknowledgment.** The limitations documented in the Known Limitations table and throughout this evaluation — no global auto-instrumentation, per-call callback injection required, no sampling, no OpenInference attributes, Langfuse-specific A2A propagation — are consequences of the native SDK implementation path, **not inherent limitations of Langfuse as a platform**. Langfuse fully supports OTel-native instrumentation; the constraints described here reflect the project's current integration approach. The evaluation results in Rounds 1 and 2 should be read with this scope in mind. Proposed change 1 below describes the specific migration steps.
+**Evaluation scope acknowledgment.** The limitations above — no global auto-instrumentation, per-call injection, no sampling, no OpenInference attributes, Langfuse-specific A2A propagation — reflect the SDK path chosen for this project, not fundamental platform constraints. Langfuse fully supports OTel-native instrumentation. Proposed change 1 below describes the migration steps.
 
 ---
 
@@ -439,7 +439,7 @@ The `resourceAttributes.service.name` field confirms that adding `os.environ.set
 | License | Distinguish between MIT/Apache 2.0 and open-core (enterprise license keys required) | **MIT** — the most permissive of the three tools. The full self-hosted version is free with no feature restrictions and no enterprise key required. [Langfuse Cloud](https://langfuse.com/pricing) offers Hobby (free), Pro, and Enterprise tiers — but the self-hosted codebase is identical to Cloud. |
 | Deployment model | Local/Docker support vs. cloud SaaS only | **Docker Compose** (self-hosted, used in this project) — 6 containers: `langfuse-web`, `langfuse-worker`, `postgres`, `clickhouse`, `redis`, `minio`. First startup downloads images, runs DB migrations, and requires manual project and API key creation in the UI before the SDK can authenticate. Langfuse Cloud (`langfuse.com`) is the managed equivalent with identical features. No single-binary CLI option equivalent to `phoenix serve`. |
 | Performance overhead | Ingestion latency and impact on the agent's end-to-end response time | **Async pipeline** — spans are queued (Redis → Worker → ClickHouse) rather than written synchronously. In practice this means a short delay (1–3 s) before a trace appears in the UI after a run completes, compared to Phoenix's near-instant display. No observable impact on agent end-to-end latency since ingestion is non-blocking from the SDK side. |
-| Resource usage | Hardware requirements (PostgreSQL, ClickHouse, SQLite) | **Highest baseline of the three tools.** Six containers run at all times: PostgreSQL stores metadata (users, projects, traces index), ClickHouse stores the raw span/event data optimised for analytics queries, Redis queues ingestion jobs, MinIO (S3-compatible) stores large payloads and media, and two Langfuse application containers (web + worker). This is significantly heavier than Phoenix (1 container, SQLite) but provides a proper async ingestion pipeline that scales to high trace volumes without degrading query performance. |
+| Resource usage | Hardware requirements (PostgreSQL, ClickHouse, SQLite) | **Moderate footprint** — six containers as listed in Local Installation. PostgreSQL handles metadata; ClickHouse handles analytics; Redis queues ingestion jobs; MinIO stores large payloads; two Langfuse app containers (web + worker). Heavier than Phoenix (1 container, SQLite) but built for high trace volumes. |
 
 **Observations from the A2A v2 experiment sessions:**
 
@@ -531,7 +531,7 @@ Langfuse captures LangGraph execution metadata via the `CallbackHandler`. The `M
 
 Q3 (comparative — Phoenix vs Langfuse) triggered 3 retries and HITL escalation with faithfulness = 0.0 on every attempt. This matches the Phoenix round 2 result exactly: the model's own training data about itself is not grounded in the retrieved web sources, causing the evaluator to label every retry as hallucinated.
 
-**Trace structure — one trace per LangGraph node, not one per query.** Each of the three agent nodes (research, evaluate, synthesize) creates a separate Langfuse trace named "ChatOpenAI". A 5-query run with no retries would produce 15 traces (5 × 3 nodes). Q3's 3 retry cycles bring its node count to 7 (3 research + 3 evaluate + 1 synthesize) instead of the usual 3, adding 4 extra traces, for a total of 19 in session `round2-langfuse-001`. There is no single "query trace" that wraps the full research → evaluate → synthesize pipeline — this view requires the session page.
+**Trace structure — one trace per LangGraph node, not one per query.** Each agent node (research, evaluate, synthesize) creates its own Langfuse trace named "ChatOpenAI". A 5-query run with no retries produces 15 traces (5 × 3 nodes). Q3's 3 retries added 4 more, for 19 total in session `round2-langfuse-001`. There is no single query-level trace — seeing the full pipeline requires the session page.
 
 **Research node trace** — the `research` node trace shows the researcher's full system prompt and the web-sourced content in the Input pane, and the structured JSON summary (`{"summary": "...", "sources": [...]}`) in the Output pane. The LangGraph flow diagram (`__start__` → `research` → `__end__`) is visible at the bottom.
 

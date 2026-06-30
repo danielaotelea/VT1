@@ -363,3 +363,78 @@ research, r_events = await self._call_agent(self.config.researcher_url, {"query"
 | `orchestrator.py` | `OrchestratorAgentA2A` — async LangGraph driving the two services |
 | `backend_a2a.py` | FastAPI REST backend on port 8002; reads exporter from `EXPORTER_A2A` at startup |
 | `ui.py` | Gradio chat UI on port 7862 — built directly (not via `src/ui.py`) to include the service status panel; polls `/health` on all three services |
+
+---
+
+## v2 — A2A Distributed Variant (`src/multi_agent_a2a/`)
+
+In v2 the Researcher and Evaluator run as independent A2A JSON-RPC services. The Orchestrator drives them over HTTP and propagates distributed trace context via W3C headers, so all three processes produce spans that share the same `trace_id`.
+
+### Service topology
+
+```mermaid
+graph LR
+    U([User])
+
+    subgraph O2[":8002 — Orchestrator"]
+        O[OrchestratorAgentA2A]
+    end
+
+    subgraph R2[":8011 — Researcher"]
+        R[ResearcherAgent]
+    end
+
+    subgraph E2[":8012 — Evaluator"]
+        E[EvaluatorAgent]
+    end
+
+    B[(Phoenix / Langfuse / Opik)]
+
+    U -->|REST POST /chat| O
+    O -->|"A2A JSON-RPC + traceparent + baggage"| R
+    R -->|"ResearchResult + trace_events"| O
+    O -->|"A2A JSON-RPC + traceparent + baggage"| E
+    E -->|"EvaluationResult + trace_events"| O
+    O -->|Final answer| U
+
+    O -. OTel spans .-> B
+    R -. OTel spans .-> B
+    E -. OTel spans .-> B
+```
+
+### Request flow and retry loop
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant O as Orchestrator :8002
+    participant R as Researcher :8011
+    participant E as Evaluator :8012
+    participant B as Observability Backend
+
+    User->>O: POST /chat {query, session_id}
+
+    loop up to max_evaluator_retries
+        O->>+R: A2A message/send {query}<br/>+ traceparent + baggage
+        R->>B: OTel spans (LLM + tool calls)
+        R-->>-O: {ResearchResult, trace_events}
+
+        O->>+E: A2A message/send {query, research}<br/>+ traceparent + baggage
+        E->>B: OTel spans (LLM judge)
+        E-->>-O: {EvaluationResult: faithfulness, label}
+
+        alt faithfulness >= threshold
+            Note over O: synthesise final answer
+        else faithfulness < low_confidence_threshold and retries < max
+            Note over O: retry_count++
+        else retries exhausted
+            Note over O: HITL escalation flag
+        end
+    end
+
+    O->>B: OTel span (synthesis LLM call)
+    O-->>User: final answer (or HITL warning)
+```
+
+`TracingMiddleware` on each sub-agent service restores OTel context from incoming headers so all spans share the same `trace_id`. See [`src/multi_agent_a2a/README.md`](../multi_agent_a2a/README.md) for full observability details, environment variables, and per-tool span hierarchy.
+---
